@@ -284,6 +284,16 @@ function initDocumentUpload() {
         
         try {
             for (const file of files) {
+                if (!['application/pdf', 'text/plain', 'application/msword', 
+                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+                    .includes(file.type)) {
+                    throw new Error('Unsupported file format');
+                }
+                
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    throw new Error('File too large');
+                }
+                
                 const doc = await documentHandler.processDocument(file);
                 uploadedDocuments.push(doc);
             }
@@ -394,69 +404,43 @@ async function callGeminiAPI(userInput) {
     }
 }
 
-// Update the form submission handler with enhanced feedback
+// Update the form submission handler with better error handling
 document.getElementById('chat-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const form = e.currentTarget;
-    const userInput = form.querySelector('#user-input');
-    const submitButton = form.querySelector('button[type="submit"]');
+    const userInput = document.getElementById('user-input');
     const message = userInput.value.trim();
     
     if (!message) {
-        feedbackUtils.inputFeedback(userInput, 'error');
+        errorHandler.showError('input');
         return;
     }
     
-    // Visual feedback for submission
-    feedbackUtils.buttonPress(submitButton);
-    feedbackUtils.inputFeedback(userInput, 'success');
-    
-    // Add processing state
-    submitButton.classList.add('processing');
-    userInput.classList.add('processing');
-    
-    // Add user message to chat
-    addMessage(message, true);
-    
-    // Clear input and disable
-    userInput.value = '';
-    userInput.disabled = true;
-    
-    // Show typing indicator
-    showTypingIndicator();
-    
-    // Add message to chat history
-    chatHistory.push({ role: 'user', content: message });
-    
     try {
-        // Get AI response
-        const response = await callGeminiAPI(message);
+        // Add user message and get response
+        addMessage(message, true);
+        userInput.value = '';
         
-        // Remove typing indicator
+        showTypingIndicator();
+        const response = await callGeminiAPI(message);
         removeTypingIndicator();
         
-        // Add AI response to chat
+        if (response.includes('Error:')) {
+            throw new Error(response);
+        }
+        
         addMessage(response);
         
-        // Add response to chat history
-        chatHistory.push({ role: 'assistant', content: response });
-        saveChatHistory();
-        
-        // Success feedback
-        submitButton.classList.add('success-animation');
-        setTimeout(() => {
-            submitButton.classList.remove('success-animation');
-        }, 500);
     } catch (error) {
-        // Error feedback
-        feedbackUtils.inputFeedback(userInput, 'error');
-    } finally {
-        // Re-enable input and reset button
-        userInput.disabled = false;
-        userInput.focus();
+        removeTypingIndicator();
         
-        submitButton.classList.remove('processing');
+        if (error.message.includes('network')) {
+            errorHandler.showError('network');
+        } else if (error.message.includes('API')) {
+            errorHandler.showError('api');
+        } else {
+            errorHandler.showError('api', error.message);
+        }
     }
 });
 
@@ -521,13 +505,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileActions = document.querySelector('.mobile-actions');
     
     function updateMobileUI() {
+        const chatContainer = document.getElementById('chat-container');
+        const form = document.getElementById('chat-form');
+        
         if (window.innerWidth <= 640) {
-            mobileActions.classList.remove('hidden');
-            const chatContainer = document.getElementById('chat-container');
-            chatContainer.style.paddingBottom = '120px';
+            // Adjust chat container padding
+            const formHeight = form.offsetHeight;
+            chatContainer.style.paddingBottom = `${formHeight + 20}px`;
+            
+            // Show mobile actions
+            mobileActions?.classList.remove('hidden');
+            
+            // Add touch feedback
+            document.querySelectorAll('.mobile-action-btn').forEach(btn => {
+                btn.addEventListener('touchstart', () => {
+                    btn.style.transform = 'scale(0.95)';
+                    if (navigator.vibrate) navigator.vibrate(50);
+                });
+                
+                btn.addEventListener('touchend', () => {
+                    btn.style.transform = 'scale(1)';
+                });
+            });
+
+            // Handle keyboard
+            const handleKeyboard = () => {
+                const viewportHeight = window.visualViewport?.height || window.innerHeight;
+                const windowHeight = window.innerHeight;
+                const keyboardHeight = windowHeight - viewportHeight;
+                
+                if (keyboardHeight > 0) {
+                    form.style.position = 'absolute';
+                    form.style.bottom = '0';
+                    chatContainer.style.paddingBottom = `${formHeight}px`;
+                } else {
+                    form.style.position = 'fixed';
+                    form.style.bottom = '0';
+                    chatContainer.style.paddingBottom = `${formHeight + 20}px`;
+                }
+            };
+
+            window.visualViewport?.addEventListener('resize', handleKeyboard);
+            window.visualViewport?.addEventListener('scroll', handleKeyboard);
         } else {
-            mobileActions.classList.add('hidden');
-            const chatContainer = document.getElementById('chat-container');
+            mobileActions?.classList.add('hidden');
             chatContainer.style.paddingBottom = '0';
         }
     }
@@ -540,24 +561,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mobile button handlers
     const mobileButtons = {
-        'upload-doc-mobile': 'upload-doc',
-        'export-chat-mobile': 'export-chat',
-        'clear-chat-mobile': 'clear-chat'
+        'upload-doc-mobile': {
+            desktopId: 'upload-doc',
+            color: 'emerald'
+        },
+        'export-chat-mobile': {
+            desktopId: 'export-chat',
+            color: 'indigo'
+        },
+        'clear-chat-mobile': {
+            desktopId: 'clear-chat',
+            color: 'red'
+        }
     };
 
-    Object.entries(mobileButtons).forEach(([mobileId, desktopId]) => {
+    Object.entries(mobileButtons).forEach(([mobileId, config]) => {
         const mobileBtn = document.getElementById(mobileId);
         if (mobileBtn) {
             mobileBtn.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                
                 // Add haptic feedback
                 if (navigator.vibrate) {
                     navigator.vibrate(50);
                 }
-                // Trigger desktop button click
-                document.getElementById(desktopId).click();
-                // Add visual feedback
+                
+                // Visual feedback
                 mobileBtn.classList.add('scale-90', 'opacity-80');
+                
+                // Add ripple effect
+                const ripple = document.createElement('div');
+                ripple.className = `absolute inset-0 bg-${config.color}-400/20 rounded-full scale-0`;
+                mobileBtn.appendChild(ripple);
+                
+                requestAnimationFrame(() => {
+                    ripple.classList.add('scale-100', 'opacity-0', 'transition-all', 'duration-500');
+                });
+                
+                setTimeout(() => ripple.remove(), 500);
+                
+                // Trigger action
+                document.getElementById(config.desktopId).click();
+                
+                // Reset button state
                 setTimeout(() => {
                     mobileBtn.classList.remove('scale-90', 'opacity-80');
                 }, 150);
@@ -1282,20 +1329,41 @@ function updateMobileUI() {
         chatContainer.style.paddingBottom = `${formHeight + 20}px`;
         
         // Show mobile actions
-        mobileActions.classList.remove('hidden');
+        mobileActions?.classList.remove('hidden');
         
         // Add touch feedback
         document.querySelectorAll('.mobile-action-btn').forEach(btn => {
             btn.addEventListener('touchstart', () => {
                 btn.style.transform = 'scale(0.95)';
+                if (navigator.vibrate) navigator.vibrate(50);
             });
             
             btn.addEventListener('touchend', () => {
                 btn.style.transform = 'scale(1)';
             });
         });
+
+        // Handle keyboard
+        const handleKeyboard = () => {
+            const viewportHeight = window.visualViewport?.height || window.innerHeight;
+            const windowHeight = window.innerHeight;
+            const keyboardHeight = windowHeight - viewportHeight;
+            
+            if (keyboardHeight > 0) {
+                form.style.position = 'absolute';
+                form.style.bottom = '0';
+                chatContainer.style.paddingBottom = `${formHeight}px`;
+            } else {
+                form.style.position = 'fixed';
+                form.style.bottom = '0';
+                chatContainer.style.paddingBottom = `${formHeight + 20}px`;
+            }
+        };
+
+        window.visualViewport?.addEventListener('resize', handleKeyboard);
+        window.visualViewport?.addEventListener('scroll', handleKeyboard);
     } else {
-        mobileActions.classList.add('hidden');
+        mobileActions?.classList.add('hidden');
         chatContainer.style.paddingBottom = '0';
     }
 }
@@ -1303,19 +1371,28 @@ function updateMobileUI() {
 // Enhanced mobile button handlers
 function initMobileButtons() {
     const mobileButtons = {
-        'upload-doc-mobile': 'upload-doc',
-        'export-chat-mobile': 'export-chat',
-        'clear-chat-mobile': 'clear-chat'
+        'upload-doc-mobile': {
+            desktopId: 'upload-doc',
+            color: 'emerald'
+        },
+        'export-chat-mobile': {
+            desktopId: 'export-chat',
+            color: 'indigo'
+        },
+        'clear-chat-mobile': {
+            desktopId: 'clear-chat',
+            color: 'red'
+        }
     };
 
-    Object.entries(mobileButtons).forEach(([mobileId, desktopId]) => {
+    Object.entries(mobileButtons).forEach(([mobileId, config]) => {
         const mobileBtn = document.getElementById(mobileId);
         if (mobileBtn) {
             mobileBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Haptic feedback
+                // Add haptic feedback
                 if (navigator.vibrate) {
                     navigator.vibrate(50);
                 }
@@ -1323,8 +1400,19 @@ function initMobileButtons() {
                 // Visual feedback
                 mobileBtn.classList.add('scale-90', 'opacity-80');
                 
+                // Add ripple effect
+                const ripple = document.createElement('div');
+                ripple.className = `absolute inset-0 bg-${config.color}-400/20 rounded-full scale-0`;
+                mobileBtn.appendChild(ripple);
+                
+                requestAnimationFrame(() => {
+                    ripple.classList.add('scale-100', 'opacity-0', 'transition-all', 'duration-500');
+                });
+                
+                setTimeout(() => ripple.remove(), 500);
+                
                 // Trigger action
-                document.getElementById(desktopId).click();
+                document.getElementById(config.desktopId).click();
                 
                 // Reset button state
                 setTimeout(() => {
@@ -1350,4 +1438,191 @@ document.addEventListener('DOMContentLoaded', () => {
             form.style.bottom = `${window.innerHeight - window.visualViewport.height}px`;
         }
     });
-}); 
+});
+
+// Add error handling utilities
+const errorHandler = {
+    // Error types and messages
+    errors: {
+        network: {
+            title: 'Connection Error',
+            message: 'Having trouble connecting. Please check your internet connection and try again.',
+            icon: 'wifi',
+            action: 'Retry'
+        },
+        input: {
+            title: 'Invalid Input',
+            message: 'Please provide a valid message to continue our conversation.',
+            icon: 'exclamation-circle',
+            action: 'Try Again'
+        },
+        api: {
+            title: 'Service Error',
+            message: 'I encountered an issue processing your request. Let me try to help differently.',
+            icon: 'server',
+            action: 'Retry'
+        },
+        file: {
+            title: 'File Error',
+            message: 'There was an issue with the file. Please ensure it\'s a supported format (PDF, TXT, DOC, DOCX).',
+            icon: 'file-alt',
+            action: 'Try Again'
+        }
+    },
+
+    // Show error with recovery options
+    showError(type, customMessage = '') {
+        const error = this.errors[type];
+        const container = document.createElement('div');
+        container.className = `
+            message flex items-start space-x-3 opacity-0 transform translate-y-4
+            error-message animate-fade-in
+        `;
+        
+        container.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 
+                        flex items-center justify-center flex-shrink-0 shadow-lg">
+                <i class="fas fa-${error.icon} text-white text-sm"></i>
+            </div>
+            <div class="message-bubble bg-red-500/10 backdrop-blur-lg rounded-2xl p-4 
+                        max-w-[80%] shadow-lg border border-red-500/20">
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-red-400">${error.title}</h4>
+                    <p class="text-gray-300">${customMessage || error.message}</p>
+                    <div class="flex items-center space-x-2 mt-2">
+                        <button class="retry-btn px-3 py-1 rounded-lg bg-red-500/20 text-red-400 
+                                     hover:bg-red-500/30 transition-colors text-sm">
+                            ${error.action}
+                        </button>
+                        <button class="help-btn px-3 py-1 rounded-lg bg-white/5 text-gray-400 
+                                     hover:bg-white/10 transition-colors text-sm">
+                            Get Help
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('chat-container').appendChild(container);
+        
+        // Animate in
+        requestAnimationFrame(() => {
+            container.style.opacity = '1';
+            container.style.transform = 'translateY(0)';
+        });
+
+        // Add button handlers
+        container.querySelector('.retry-btn').addEventListener('click', () => {
+            this.handleRetry(type);
+        });
+
+        container.querySelector('.help-btn').addEventListener('click', () => {
+            this.showHelpPrompts(type);
+        });
+    },
+
+    // Handle retry attempts
+    handleRetry(type) {
+        switch(type) {
+            case 'network':
+                // Retry last action
+                document.getElementById('user-input').focus();
+                break;
+            case 'input':
+                // Show input suggestions
+                this.showInputSuggestions();
+                break;
+            case 'api':
+                // Retry with simplified prompt
+                this.retryWithSimplifiedPrompt();
+                break;
+            case 'file':
+                // Show file upload guide
+                this.showFileGuide();
+                break;
+        }
+    },
+
+    // Show helpful prompts
+    showHelpPrompts(type) {
+        const prompts = {
+            network: [
+                "Check your internet connection",
+                "Try refreshing the page",
+                "Clear browser cache and try again"
+            ],
+            input: [
+                "Try asking a simple question",
+                "Be more specific about what you need",
+                "Use shorter sentences"
+            ],
+            api: [
+                "Try rephrasing your question",
+                "Break down complex questions into simpler ones",
+                "Wait a moment and try again"
+            ],
+            file: [
+                "Ensure file is in supported format",
+                "Try with a smaller file",
+                "Check if file is corrupted"
+            ]
+        };
+
+        addMessage(`Here are some suggestions to help:
+            ${prompts[type].map(p => `• ${p}`).join('\n')}
+            
+            Let me know if you need more assistance!`, false);
+    },
+
+    // Show input suggestions
+    showInputSuggestions() {
+        const suggestions = [
+            "Tell me about yourself",
+            "How can you help me?",
+            "What can you do?",
+            "Show available commands"
+        ];
+
+        const container = document.createElement('div');
+        container.className = 'suggestions-container p-2 space-y-2';
+        
+        suggestions.forEach(suggestion => {
+            const btn = document.createElement('button');
+            btn.className = `
+                w-full px-4 py-2 rounded-lg bg-white/5 text-gray-300 
+                hover:bg-white/10 transition-colors text-left text-sm
+            `;
+            btn.textContent = suggestion;
+            btn.onclick = () => {
+                document.getElementById('user-input').value = suggestion;
+                document.getElementById('chat-form').requestSubmit();
+            };
+            container.appendChild(btn);
+        });
+
+        addMessage(container.outerHTML, false);
+    },
+
+    // Retry with simplified prompt
+    retryWithSimplifiedPrompt() {
+        const lastMessage = chatHistory[chatHistory.length - 1];
+        if (lastMessage && lastMessage.role === 'user') {
+            const simplifiedPrompt = `Let me try to understand this more simply: ${lastMessage.content}`;
+            document.getElementById('user-input').value = simplifiedPrompt;
+            document.getElementById('chat-form').requestSubmit();
+        }
+    },
+
+    // Show file upload guide
+    showFileGuide() {
+        addMessage(`
+            Here's how to successfully upload files:
+            • Supported formats: PDF, TXT, DOC, DOCX
+            • Maximum file size: 10MB
+            • Files should be readable and not password protected
+            • Try converting to PDF if having issues
+            
+            Would you like to try uploading again?
+        `, false);
+    }
+}; 
