@@ -392,6 +392,197 @@
             50% { transform: scale(1.1); filter: hue-rotate(180deg); }
             100% { transform: scale(1); filter: hue-rotate(360deg); }
         }
+
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            /* Better button spacing */
+            .flex.items-center.space-x-2 {
+                gap: 0.5rem;
+            }
+
+            /* Optimize header for mobile */
+            .header-title {
+                font-size: 1.25rem;
+                line-height: 1.2;
+            }
+
+            /* Better button touch targets */
+            button {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 0.5rem !important;
+            }
+
+            /* Improve mobile spacing */
+            .p-4.sm\:p-6 {
+                padding: 1rem !important;
+            }
+
+            /* Better message bubbles on mobile */
+            .message-bubble {
+                max-width: 85% !important;
+                padding: 0.875rem !important;
+            }
+
+            /* Optimize input area for mobile */
+            #chat-form {
+                gap: 0.5rem;
+            }
+
+            #user-input {
+                font-size: 16px !important; /* Prevent iOS zoom */
+                padding: 0.75rem 2.5rem 0.75rem 0.75rem !important;
+            }
+
+            /* Hide text labels on mobile, show only icons */
+            @media (max-width: 480px) {
+                .button-text {
+                    display: none;
+                }
+
+                .button-icon {
+                    margin: 0 !important;
+                }
+
+                /* Compact header for very small screens */
+                .header-title {
+                    font-size: 1.125rem;
+                }
+
+                /* Better spacing for action buttons */
+                .flex.items-center.space-x-2.sm\:space-x-3 {
+                    gap: 0.375rem;
+                }
+
+                /* Optimize button sizes */
+                button {
+                    padding: 0.625rem !important;
+                }
+            }
+
+            /* Better bottom bar handling */
+            .chat-container {
+                padding-bottom: 80px !important;
+            }
+
+            #chat-form {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 0.75rem;
+                background: rgba(17, 24, 39, 0.8);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                z-index: 50;
+            }
+
+            /* Safe area handling for modern mobile devices */
+            @supports (padding-bottom: env(safe-area-inset-bottom)) {
+                #chat-form {
+                    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+                }
+            }
+
+            /* Better keyboard handling */
+            .chat-container {
+                height: calc(100vh - 180px);
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Optimize for different screen sizes */
+            @media (max-height: 667px) {
+                .chat-container {
+                    height: calc(100vh - 160px);
+                }
+            }
+        }
+
+        /* Mobile-specific UI improvements */
+        @media (max-width: 640px) {
+            /* Hide desktop action buttons */
+            .desktop-actions {
+                display: none;
+            }
+
+            /* Mobile action buttons container */
+            .mobile-actions {
+                display: flex;
+                position: absolute;
+                right: 0.75rem;
+                bottom: calc(100% + 0.5rem);
+                gap: 0.5rem;
+                z-index: 60;
+            }
+
+            /* Mobile action button styling */
+            .mobile-action-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+
+            /* Button specific styles */
+            .mobile-action-btn.delete {
+                background: rgba(239, 68, 68, 0.2);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+                color: rgb(252, 165, 165);
+            }
+
+            .mobile-action-btn.download {
+                background: rgba(99, 102, 241, 0.2);
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                color: rgb(165, 180, 252);
+            }
+
+            .mobile-action-btn.upload {
+                background: rgba(16, 185, 129, 0.2);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                color: rgb(110, 231, 183);
+            }
+
+            /* Hover effects */
+            .mobile-action-btn:active {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            /* Enhanced chat form for mobile */
+            #chat-form {
+                background: rgba(17, 24, 39, 0.95);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 0.75rem;
+                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 50;
+            }
+
+            /* Better input styling for mobile */
+            #user-input {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding-right: 3rem !important;
+            }
+
+            /* Adjust chat container padding */
+            .chat-container {
+                padding-bottom: 100px !important;
+            }
+        }
     </style>
     <script src="welcome.js"></script>
     <script>
@@ -476,22 +667,23 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Show buttons only on desktop -->
+                <div class="hidden sm:flex items-center space-x-2 sm:space-x-3">
                     <button id="upload-doc" 
                             class="p-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 transition-all duration-300 flex items-center space-x-2 border border-emerald-500/20 hover:border-emerald-500/30 shadow-lg hover:shadow-xl hover-scale"
                             title="Upload Document">
-                        <i class="fas fa-file-upload button-icon"></i>
-                        <span class="button-text">Upload Doc</span>
+                        <i class="fas fa-file-upload"></i>
+                        <span class="hidden sm:inline">Upload Doc</span>
                     </button>
                     <button id="export-chat" 
                             class="p-2 sm:px-4 sm:py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 flex items-center space-x-2 border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl hover-scale">
-                        <i class="fas fa-download button-icon"></i>
-                        <span class="button-text">Export</span>
+                        <i class="fas fa-download"></i>
+                        <span class="hidden sm:inline">Export</span>
                     </button>
                     <button id="clear-chat" 
                             class="p-2 sm:px-4 sm:py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all duration-300 flex items-center space-x-2 border border-red-500/20 hover:border-red-500/30 shadow-lg hover:shadow-xl hover-scale">
-                        <i class="fas fa-trash-alt button-icon"></i>
-                        <span class="button-text">Clear</span>
+                        <i class="fas fa-trash-alt"></i>
+                        <span class="hidden sm:inline">Clear</span>
                     </button>
                 </div>
             </div>
@@ -511,34 +703,69 @@
 
             <!-- Chat Input -->
             <div class="p-4 sm:p-6 border-t border-white/10 relative z-10">
-                <form id="chat-form" class="flex space-x-2 sm:space-x-4">
+                <!-- Mobile action buttons - Floating at bottom right -->
+                <div class="mobile-actions fixed bottom-24 right-4 flex flex-col-reverse gap-3 z-50 sm:hidden">
+                    <button id="upload-doc-mobile" 
+                            class="mobile-action-btn p-3 rounded-full shadow-lg backdrop-blur-md
+                                   bg-gradient-to-r from-emerald-500/90 to-teal-500/90 text-white
+                                   transform transition-all duration-300 hover:scale-110 active:scale-95" 
+                            title="Upload Document">
+                        <i class="fas fa-file-upload text-lg"></i>
+                    </button>
+                    <button id="export-chat-mobile" 
+                            class="mobile-action-btn p-3 rounded-full shadow-lg backdrop-blur-md
+                                   bg-gradient-to-r from-indigo-500/90 to-purple-500/90 text-white
+                                   transform transition-all duration-300 hover:scale-110 active:scale-95" 
+                            title="Export Chat">
+                        <i class="fas fa-download text-lg"></i>
+                    </button>
+                    <button id="clear-chat-mobile" 
+                            class="mobile-action-btn p-3 rounded-full shadow-lg backdrop-blur-md
+                                   bg-gradient-to-r from-red-500/90 to-pink-500/90 text-white
+                                   transform transition-all duration-300 hover:scale-110 active:scale-95" 
+                            title="Clear Chat">
+                        <i class="fas fa-trash-alt text-lg"></i>
+                    </button>
+                </div>
+
+                <form id="chat-form" class="flex space-x-2 sm:space-x-4 bg-gray-900/95 backdrop-blur-lg">
                     <div class="flex-1 relative">
                         <input type="text" id="user-input" 
-                               class="w-full p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-lg"
+                               class="w-full p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 
+                                      text-white placeholder-gray-400 focus:outline-none focus:ring-2 
+                                      focus:ring-indigo-500 focus:border-transparent shadow-lg
+                                      text-base sm:text-lg"
                                placeholder="Type your message here...">
                         <button type="button" 
-                                class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition-colors p-1"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 
+                                       text-gray-400 hover:text-indigo-500 transition-colors p-2
+                                       rounded-full hover:bg-white/5"
                                 title="Voice input">
-                            <i class="fas fa-microphone"></i>
+                            <i class="fas fa-microphone text-lg"></i>
                         </button>
                     </div>
                     <button type="submit" 
-                            class="p-3 sm:px-6 sm:py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:opacity-90 transition-all duration-300 flex items-center space-x-2 hover:scale-105 shadow-lg hover:shadow-xl"
+                            class="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 
+                                   text-white hover:opacity-90 transition-all duration-300 
+                                   flex items-center justify-center hover:scale-105 shadow-lg 
+                                   hover:shadow-xl min-w-[44px] min-h-[44px]"
                             title="Send message">
-                        <span class="button-text">Send</span>
-                        <i class="fas fa-paper-plane button-icon"></i>
+                            <i class="fas fa-paper-plane text-lg"></i>
                     </button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Add this hidden file input -->
+    <!-- Update the file input with proper accessibility -->
+    <label for="doc-upload" class="sr-only">Upload Documents</label>
     <input type="file" 
            id="doc-upload" 
            accept=".txt,.pdf,.doc,.docx" 
            class="hidden" 
-           multiple>
+           multiple
+           title="Upload documents (PDF, TXT, DOC, DOCX)"
+           aria-label="Upload documents">
 
     <script src="script.js"></script>
 </body>

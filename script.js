@@ -516,6 +516,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initDocumentUpload();
+
+    // Show/hide mobile actions based on screen size
+    const mobileActions = document.querySelector('.mobile-actions');
+    
+    function updateMobileUI() {
+        if (window.innerWidth <= 640) {
+            mobileActions.classList.remove('hidden');
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.style.paddingBottom = '120px';
+        } else {
+            mobileActions.classList.add('hidden');
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.style.paddingBottom = '0';
+        }
+    }
+
+    // Initial check
+    updateMobileUI();
+
+    // Update on resize
+    window.addEventListener('resize', updateMobileUI);
+
+    // Mobile button handlers
+    const mobileButtons = {
+        'upload-doc-mobile': 'upload-doc',
+        'export-chat-mobile': 'export-chat',
+        'clear-chat-mobile': 'clear-chat'
+    };
+
+    Object.entries(mobileButtons).forEach(([mobileId, desktopId]) => {
+        const mobileBtn = document.getElementById(mobileId);
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Add haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                // Trigger desktop button click
+                document.getElementById(desktopId).click();
+                // Add visual feedback
+                mobileBtn.classList.add('scale-90', 'opacity-80');
+                setTimeout(() => {
+                    mobileBtn.classList.remove('scale-90', 'opacity-80');
+                }, 150);
+            });
+        }
+    });
 });
 
 // Function to save chat history to localStorage
@@ -1220,4 +1268,86 @@ function handleIdentityQuery(message) {
     
     // If no identity-related query is detected, return null
     return null;
-} 
+}
+
+// Update mobile UI handler
+function updateMobileUI() {
+    const mobileActions = document.querySelector('.mobile-actions');
+    const chatContainer = document.getElementById('chat-container');
+    const form = document.getElementById('chat-form');
+    
+    if (window.innerWidth <= 640) {
+        // Adjust chat container padding
+        const formHeight = form.offsetHeight;
+        chatContainer.style.paddingBottom = `${formHeight + 20}px`;
+        
+        // Show mobile actions
+        mobileActions.classList.remove('hidden');
+        
+        // Add touch feedback
+        document.querySelectorAll('.mobile-action-btn').forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                btn.style.transform = 'scale(0.95)';
+            });
+            
+            btn.addEventListener('touchend', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+    } else {
+        mobileActions.classList.add('hidden');
+        chatContainer.style.paddingBottom = '0';
+    }
+}
+
+// Enhanced mobile button handlers
+function initMobileButtons() {
+    const mobileButtons = {
+        'upload-doc-mobile': 'upload-doc',
+        'export-chat-mobile': 'export-chat',
+        'clear-chat-mobile': 'clear-chat'
+    };
+
+    Object.entries(mobileButtons).forEach(([mobileId, desktopId]) => {
+        const mobileBtn = document.getElementById(mobileId);
+        if (mobileBtn) {
+            mobileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                
+                // Visual feedback
+                mobileBtn.classList.add('scale-90', 'opacity-80');
+                
+                // Trigger action
+                document.getElementById(desktopId).click();
+                
+                // Reset button state
+                setTimeout(() => {
+                    mobileBtn.classList.remove('scale-90', 'opacity-80');
+                }, 150);
+            });
+        }
+    });
+}
+
+// Initialize mobile enhancements
+document.addEventListener('DOMContentLoaded', () => {
+    updateMobileUI();
+    initMobileButtons();
+    
+    // Update UI on resize
+    window.addEventListener('resize', updateMobileUI);
+    
+    // Handle keyboard showing/hiding on mobile
+    window.visualViewport?.addEventListener('resize', () => {
+        if (window.innerWidth <= 640) {
+            const form = document.getElementById('chat-form');
+            form.style.bottom = `${window.innerHeight - window.visualViewport.height}px`;
+        }
+    });
+}); 
