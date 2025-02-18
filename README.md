@@ -16,6 +16,7 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 - 📝 Markdown support
 - 💾 Local storage for chat history
 - 📄 Document processing capabilities
+- 👤 Personalized user experience with name recognition
 
 ### UI/UX Features
 - 🎨 Modern glassmorphism design
@@ -23,6 +24,8 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 - ✨ Smooth animations and transitions
 - 🔄 Real-time typing indicators
 - 🎯 Enhanced user feedback
+- 🌟 Interactive welcome popup
+- 🎭 Dynamic favicon animation
 
 ### Document Handling
 - 📁 Support for multiple file formats (PDF, TXT, DOC, DOCX)
@@ -36,6 +39,14 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 - 📳 Haptic feedback
 - 🔝 Floating action buttons
 - ⌨️ Enhanced mobile keyboard handling
+- 📱 Mobile-specific menu
+
+### User Personalization
+- 👋 Personal greeting system
+- 🔄 Visit tracking
+- 💾 Name remembering
+- 🎨 Customized responses
+- 📅 Session management
 
 ### Export & Management
 - 📑 PDF export functionality
@@ -63,12 +74,14 @@ Aberty AI is fully optimized for mobile devices with:
 - Touch-friendly interface
 - Mobile-specific features
 - Optimized performance
+- Compact menu system
 
 ## 🔒 Privacy
 - All chat history is stored locally
 - No server-side data storage
 - Secure document handling
 - Confidential processing
+- Personal data protection
 
 ## 🎨 UI Components
 - Modern chat interface
@@ -77,6 +90,8 @@ Aberty AI is fully optimized for mobile devices with:
 - Interactive elements
 - Custom scrollbars
 - Loading indicators
+- Welcome popup
+- Animated favicon
 
 ## 👨‍💻 Developer
 Created by Aditya
@@ -92,4 +107,4 @@ Created by Aditya
 This project is licensed under the MIT License - see the LICENSE.md file for details
 
 ---
-Made  by Aditya | Powered by Alien Intelligence @ 2025
+Made by Aditya | Powered by Alien Intelligence @ 2025

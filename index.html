@@ -603,12 +603,14 @@
         </div>
     </div>
 
-    <!-- Add this hidden file input -->
+    <!-- Update the file input with proper accessibility attributes -->
     <input type="file" 
            id="doc-upload" 
            accept=".txt,.pdf,.doc,.docx" 
            class="hidden" 
-           multiple>
+           multiple
+           title="Upload documents"
+           aria-label="Upload documents">
 
     <script src="script.js"></script>
 </body>
