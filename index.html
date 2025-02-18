@@ -11,6 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <link rel="icon" type="image/png" href="logo.png" id="favicon">
     <style>
         .chat-container {
             scrollbar-width: thin;
@@ -384,7 +385,65 @@
                 padding: 0.75rem;
             }
         }
+
+        /* Favicon animation */
+        @keyframes faviconPulse {
+            0% { transform: scale(1); filter: hue-rotate(0deg); }
+            50% { transform: scale(1.1); filter: hue-rotate(180deg); }
+            100% { transform: scale(1); filter: hue-rotate(360deg); }
+        }
     </style>
+    <script src="welcome.js"></script>
+    <script>
+        // Favicon animation handler
+        const faviconAnimator = {
+            init() {
+                const favicon = document.getElementById('favicon');
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = 32;
+                canvas.height = 32;
+                
+                const img = new Image();
+                img.src = 'logo.png';
+                
+                img.onload = () => {
+                    let hue = 0;
+                    let scale = 1;
+                    
+                    setInterval(() => {
+                        // Clear canvas
+                        ctx.clearRect(0, 0, 32, 32);
+                        
+                        // Update animation values
+                        hue = (hue + 2) % 360;
+                        scale = 1 + Math.sin(Date.now() / 500) * 0.1;
+                        
+                        // Apply transformations
+                        ctx.save();
+                        ctx.translate(16, 16);
+                        ctx.scale(scale, scale);
+                        ctx.translate(-16, -16);
+                        
+                        // Draw image with filters
+                        ctx.filter = `hue-rotate(${hue}deg) brightness(1.2)`;
+                        ctx.drawImage(img, 0, 0, 32, 32);
+                        
+                        ctx.restore();
+                        
+                        // Update favicon
+                        favicon.href = canvas.toDataURL('image/png');
+                    }, 50);
+                };
+            }
+        };
+
+        // Initialize favicon animation when document loads
+        document.addEventListener('DOMContentLoaded', () => {
+            faviconAnimator.init();
+        });
+    </script>
 </head>
 <body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen flex flex-col">
     <div class="container mx-auto p-4 flex-1 flex flex-col max-w-4xl">

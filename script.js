@@ -41,6 +41,52 @@ const mobileUtils = {
     }
 };
 
+// Add these feedback utility functions
+const feedbackUtils = {
+    // Button press feedback
+    buttonPress: (button) => {
+        button.classList.add('scale-95', 'opacity-80');
+        mobileUtils.vibrate(30);
+        setTimeout(() => {
+            button.classList.remove('scale-95', 'opacity-80');
+        }, 150);
+    },
+
+    // Success ripple effect
+    createRipple: (event, color = 'rgba(255, 255, 255, 0.3)') => {
+        const button = event.currentTarget;
+        const circle = document.createElement('span');
+        const diameter = Math.max(button.clientWidth, button.clientHeight);
+        const radius = diameter / 2;
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+        circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+        circle.classList.add('ripple');
+        
+        const ripple = button.getElementsByClassName('ripple')[0];
+        if (ripple) {
+            ripple.remove();
+        }
+
+        button.appendChild(circle);
+    },
+
+    // Input feedback
+    inputFeedback: (input, type = 'success') => {
+        const colors = {
+            success: 'ring-green-500',
+            error: 'ring-red-500',
+            processing: 'ring-blue-500'
+        };
+        
+        input.classList.add('ring-2', colors[type]);
+        setTimeout(() => {
+            input.classList.remove('ring-2', colors[type]);
+        }, 1000);
+    }
+};
+
 // Function to add messages to the chat container
 function addMessage(message, isUser = false) {
     const chatContainer = document.getElementById('chat-container');
@@ -222,7 +268,9 @@ function initDocumentUpload() {
         uploadedDocuments = JSON.parse(savedDocs);
     }
     
-    uploadBtn.addEventListener('click', () => {
+    uploadBtn.addEventListener('click', (e) => {
+        feedbackUtils.createRipple(e);
+        feedbackUtils.buttonPress(e.currentTarget);
         fileInput.click();
     });
     
@@ -230,6 +278,8 @@ function initDocumentUpload() {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
         
+        // Visual feedback for upload start
+        uploadBtn.classList.add('processing');
         showToast('Processing documents...', 'info');
         
         try {
@@ -243,8 +293,17 @@ function initDocumentUpload() {
             
             showToast(`Successfully processed ${files.length} document(s)`, 'success');
             addMessage(`I've processed ${files.length} new document(s). You can now ask me questions about them!`, false);
+            
+            // Success feedback
+            uploadBtn.classList.add('success-animation');
         } catch (error) {
-            showToast('Error processing documents', 'error');
+            // Error feedback
+            uploadBtn.classList.add('ring-2', 'ring-red-500');
+            setTimeout(() => {
+                uploadBtn.classList.remove('ring-2', 'ring-red-500');
+            }, 1000);
+        } finally {
+            uploadBtn.classList.remove('processing');
         }
         
         // Clear input
@@ -335,15 +394,27 @@ async function callGeminiAPI(userInput) {
     }
 }
 
-// Update the form submission handler
+// Update the form submission handler with enhanced feedback
 document.getElementById('chat-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const userInput = document.getElementById('user-input');
+    const form = e.currentTarget;
+    const userInput = form.querySelector('#user-input');
+    const submitButton = form.querySelector('button[type="submit"]');
     const message = userInput.value.trim();
-    const submitButton = e.target.querySelector('button[type="submit"]');
     
-    if (!message) return;
+    if (!message) {
+        feedbackUtils.inputFeedback(userInput, 'error');
+        return;
+    }
+    
+    // Visual feedback for submission
+    feedbackUtils.buttonPress(submitButton);
+    feedbackUtils.inputFeedback(userInput, 'success');
+    
+    // Add processing state
+    submitButton.classList.add('processing');
+    userInput.classList.add('processing');
     
     // Add user message to chat
     addMessage(message, true);
@@ -351,14 +422,6 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
     // Clear input and disable
     userInput.value = '';
     userInput.disabled = true;
-    userInput.classList.add('processing-input');
-    
-    // Update submit button
-    submitButton.disabled = true;
-    submitButton.innerHTML = `
-        <i class="fas fa-robot thinking-animation"></i>
-        <span>Processing...</span>
-    `;
     
     // Show typing indicator
     showTypingIndicator();
@@ -379,20 +442,21 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
         // Add response to chat history
         chatHistory.push({ role: 'assistant', content: response });
         saveChatHistory();
+        
+        // Success feedback
+        submitButton.classList.add('success-animation');
+        setTimeout(() => {
+            submitButton.classList.remove('success-animation');
+        }, 500);
     } catch (error) {
-        removeTypingIndicator();
-        showToast('An error occurred while processing your request.', 'error');
+        // Error feedback
+        feedbackUtils.inputFeedback(userInput, 'error');
     } finally {
         // Re-enable input and reset button
         userInput.disabled = false;
-        userInput.classList.remove('processing-input');
         userInput.focus();
         
-        submitButton.disabled = false;
-        submitButton.innerHTML = `
-            <span>Send</span>
-            <i class="fas fa-paper-plane"></i>
-        `;
+        submitButton.classList.remove('processing');
     }
 });
 
@@ -771,6 +835,62 @@ document.head.insertAdjacentHTML('beforeend', `
                 padding: 0.75rem;
             }
         }
+
+        /* Ripple effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Button press effect */
+        .button-press {
+            transform: scale(0.95);
+            opacity: 0.8;
+            transition: all 0.15s ease;
+        }
+
+        /* Success animation */
+        .success-animation {
+            animation: successPulse 0.5s ease;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Processing state */
+        .processing {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .processing::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            animation: processing 1.5s linear infinite;
+        }
+
+        @keyframes processing {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
     </style>
 `);
 
@@ -983,6 +1103,15 @@ function enhanceMobileInput() {
             }
         }
     }
+
+    // Add touch feedback
+    input.addEventListener('touchstart', () => {
+        input.classList.add('scale-[1.02]');
+    });
+
+    input.addEventListener('touchend', () => {
+        input.classList.remove('scale-[1.02]');
+    });
 }
 
 // Enhance mobile scrolling
