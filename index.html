@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <meta name="theme-color" content="#1F2937">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <style>
         .chat-container {
             scrollbar-width: thin;
@@ -162,95 +166,320 @@
         button:active {
             transform: translateY(0);
         }
+
+        /* Enhanced responsive styles */
+        @media (max-width: 640px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .message {
+                margin-bottom: 0.75rem;
+            }
+            
+            .chat-bubble {
+                max-width: 85% !important;
+                padding: 0.75rem !important;
+            }
+            
+            .header-title {
+                font-size: 1.25rem;
+            }
+            
+            .button-text {
+                display: none;
+            }
+            
+            .button-icon {
+                margin: 0 !important;
+            }
+        }
+        
+        /* Updated color schemes */
+        .user-message {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .bot-message {
+            background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+            color: #E2E8F0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Enhanced animations */
+        .hover-scale {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Improved scrollbar for mobile */
+        @media (max-width: 640px) {
+            .chat-container::-webkit-scrollbar {
+                width: 4px;
+            }
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 640px) {
+            .chat-container {
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+                padding-bottom: 100px; /* Space for floating input */
+            }
+
+            .message {
+                margin-bottom: 1rem;
+                transition: transform 0.3s ease;
+            }
+
+            .message:active {
+                transform: scale(0.98);
+            }
+
+            /* Enhanced mobile scrollbar */
+            .chat-container::-webkit-scrollbar {
+                width: 4px;
+                height: 4px;
+            }
+
+            .chat-container::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+            }
+
+            /* Better touch targets */
+            button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            input[type="text"] {
+                min-height: 44px;
+                font-size: 16px; /* Prevent iOS zoom */
+            }
+
+            /* Floating input bar */
+            #chat-form {
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* Enhanced animations for mobile */
+        @media (prefers-reduced-motion: no-preference) {
+            .message {
+                animation: slideInMobile 0.3s ease-out;
+            }
+
+            @keyframes slideInMobile {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .floating-button {
+                animation: floatAnimation 2s infinite;
+            }
+
+            @keyframes floatAnimation {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-4px); }
+            }
+        }
+
+        /* Enhanced Message Bubbles */
+        .message-bubble {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message-bubble::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message-bubble:hover::before {
+            opacity: 1;
+        }
+
+        /* Better Typography */
+        .message-text {
+            line-height: 1.6;
+            font-size: 1rem;
+            letter-spacing: 0.015em;
+        }
+
+        .code-block {
+            font-family: 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+        }
+
+        /* Enhanced Scrollbar */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Better Focus States */
+        .focus-ring {
+            @apply ring-2 ring-offset-2 ring-offset-gray-900 ring-indigo-500;
+            outline: none;
+        }
+
+        /* Enhanced Mobile Experience */
+        @media (max-width: 640px) {
+            .message-text {
+                font-size: 0.95rem;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+            }
+
+            .code-block {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-900 to-gray-800 h-screen flex flex-col">
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen flex flex-col">
     <div class="container mx-auto p-4 flex-1 flex flex-col max-w-4xl">
-        <!-- Header Section -->
-        <div class="text-center mb-6 slide-in">
-            <div class="inline-flex items-center space-x-3 bg-white/10 px-6 py-3 rounded-full backdrop-blur-lg">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center">
+        <!-- Header Section - Make it more compact on mobile -->
+        <div class="text-center mb-4 sm:mb-6 slide-in">
+            <div class="inline-flex items-center space-x-3 bg-white/10 px-4 sm:px-6 py-2 sm:py-3 rounded-full backdrop-blur-lg hover-scale">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
                     <i class="fas fa-robot text-white"></i>
                 </div>
                 <div class="text-left">
-                    <h1 class="text-2xl font-bold text-white">Aberty AI</h1>
-                    <p class="text-gray-300 text-sm">Powered by Alien Intelligence</p>
+                    <h1 class="text-xl sm:text-2xl font-bold text-white header-title">Aberty AI</h1>
+                    <p class="text-sm text-gray-300">Powered by Alien Intelligence</p>
                 </div>
             </div>
         </div>
 
+        <!-- Main Chat Container -->
         <div class="bg-white/5 rounded-3xl shadow-2xl flex-1 flex flex-col backdrop-blur-xl border border-white/10 relative overflow-hidden">
-            <!-- Add decorative elements -->
-            <div class="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 pointer-events-none"></div>
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/20 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-3xl"></div>
-
             <!-- Chat Header -->
-            <div class="p-6 border-b border-white/10 flex items-center justify-between relative z-10">
+            <div class="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between relative z-10">
                 <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center pulse shadow-lg">
-                        <i class="fas fa-robot text-white text-xl"></i>
+                    <div class="w-10 sm:w-12 h-10 sm:h-12 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center pulse shadow-lg">
+                        <i class="fas fa-robot text-white text-lg sm:text-xl"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-white">Aberty AI</h2>
+                        <h2 class="text-lg sm:text-xl font-bold text-white">Aberty AI</h2>
                         <div class="flex items-center space-x-2">
                             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                             <p class="text-gray-400 text-sm">Online & Ready</p>
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <button id="upload-doc" 
+                            class="p-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 transition-all duration-300 flex items-center space-x-2 border border-emerald-500/20 hover:border-emerald-500/30 shadow-lg hover:shadow-xl hover-scale"
+                            title="Upload Document">
+                        <i class="fas fa-file-upload button-icon"></i>
+                        <span class="button-text">Upload Doc</span>
+                    </button>
                     <button id="export-chat" 
-                            class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 flex items-center space-x-2 border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl"
-                            title="Export chat history">
-                        <i class="fas fa-download"></i>
-                        <span>Export</span>
+                            class="p-2 sm:px-4 sm:py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 flex items-center space-x-2 border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl hover-scale">
+                        <i class="fas fa-download button-icon"></i>
+                        <span class="button-text">Export</span>
                     </button>
                     <button id="clear-chat" 
-                            class="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all duration-300 flex items-center space-x-2 border border-red-500/20 hover:border-red-500/30 shadow-lg hover:shadow-xl"
-                            title="Clear chat history">
-                        <i class="fas fa-trash-alt"></i>
-                        <span>Clear</span>
+                            class="p-2 sm:px-4 sm:py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all duration-300 flex items-center space-x-2 border border-red-500/20 hover:border-red-500/30 shadow-lg hover:shadow-xl hover-scale">
+                        <i class="fas fa-trash-alt button-icon"></i>
+                        <span class="button-text">Clear</span>
                     </button>
                 </div>
             </div>
 
             <!-- Chat Messages -->
-            <div class="flex-1 p-6 overflow-y-auto chat-container space-y-6" id="chat-container">
+            <div class="flex-1 p-4 sm:p-6 overflow-y-auto chat-container custom-scrollbar space-y-4 sm:space-y-6" id="chat-container">
                 <div class="message flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg">
                         <i class="fas fa-robot text-white text-sm"></i>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 max-w-[80%] shadow-lg border border-white/10">
-                        <p class="text-white">Hello! I'm Aberty AI. How can I assist you today? 🚀</p>
-                        <span class="text-xs text-gray-400 mt-2 block">Just now</span>
+                    <div class="message-bubble bg-white/10 backdrop-blur-lg rounded-2xl p-4 max-w-[80%] shadow-lg">
+                        <p class="message-text text-white">Hello! I'm Aberty AI. How can I assist you today? 🚀</p>
+                        <span class="text-xs text-gray-400 mt-2 block opacity-75">Just now</span>
                     </div>
                 </div>
             </div>
 
             <!-- Chat Input -->
-            <div class="p-6 border-t border-white/10 relative z-10">
-                <form id="chat-form" class="flex space-x-4">
+            <div class="p-4 sm:p-6 border-t border-white/10 relative z-10">
+                <form id="chat-form" class="flex space-x-2 sm:space-x-4">
                     <div class="flex-1 relative">
                         <input type="text" id="user-input" 
-                               class="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent shadow-lg"
+                               class="w-full p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-lg"
                                placeholder="Type your message here...">
                         <button type="button" 
-                                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-violet-500 transition-colors"
+                                class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition-colors p-1"
                                 title="Voice input">
                             <i class="fas fa-microphone"></i>
                         </button>
                     </div>
                     <button type="submit" 
-                            class="px-6 py-4 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white hover:opacity-90 transition-all duration-300 flex items-center space-x-2 hover:scale-105 shadow-lg hover:shadow-xl"
+                            class="p-3 sm:px-6 sm:py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:opacity-90 transition-all duration-300 flex items-center space-x-2 hover:scale-105 shadow-lg hover:shadow-xl"
                             title="Send message">
-                        <span>Send</span>
-                        <i class="fas fa-paper-plane"></i>
+                        <span class="button-text">Send</span>
+                        <i class="fas fa-paper-plane button-icon"></i>
                     </button>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Add this hidden file input -->
+    <input type="file" 
+           id="doc-upload" 
+           accept=".txt,.pdf,.doc,.docx" 
+           class="hidden" 
+           multiple>
 
     <script src="script.js"></script>
 </body>

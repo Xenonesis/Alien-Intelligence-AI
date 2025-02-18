@@ -3,9 +3,11 @@ const API_KEY = 'AIzaSyCYZrSd57RHna4ujKA5Q_rCRJ18oLe7z2o';
 
 // Add these constants at the top of the file
 const STORAGE_KEY = 'aberty_chat_history';
+const DOCS_STORAGE_KEY = 'aberty_documents';
 
 // Chat history to maintain context
 let chatHistory = [];
+let uploadedDocuments = [];
 
 // Add these constants at the top
 const BOT_INFO = {
@@ -22,6 +24,23 @@ const BOT_INFO = {
     }
 };
 
+// Add these mobile-specific utilities
+const mobileUtils = {
+    isTouch: 'ontouchstart' in window,
+    
+    // Haptic feedback function
+    vibrate: (pattern = 50) => {
+        if (navigator.vibrate) {
+            navigator.vibrate(pattern);
+        }
+    },
+
+    // Scroll handling
+    isScrolledToBottom: (element, threshold = 100) => {
+        return element.scrollHeight - element.scrollTop - element.clientHeight < threshold;
+    }
+};
+
 // Function to add messages to the chat container
 function addMessage(message, isUser = false) {
     const chatContainer = document.getElementById('chat-container');
@@ -29,21 +48,24 @@ function addMessage(message, isUser = false) {
     messageDiv.className = `message flex items-start space-x-3 opacity-0 transform translate-y-4 ${isUser ? 'justify-end' : ''}`;
     
     const iconClass = isUser ? 'fa-user' : 'fa-robot';
-    const bubbleClass = isUser ? 'user-bubble' : 'bg-white';
-    const textColor = isUser ? 'text-white' : 'text-gray-800';
-    
-    // Format message if it contains markdown-style content
+    const bubbleClass = isUser ? 'user-message' : 'bot-message';
     const formattedMessage = isUser ? message : formatMessage(message);
     
     messageDiv.innerHTML = `
         ${!isUser ? `
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg">
                 <i class="fas ${iconClass} text-white text-sm"></i>
             </div>
         ` : ''}
-        <div class="${bubbleClass} rounded-2xl p-4 max-w-[80%] shadow-lg chat-bubble hover:shadow-xl transition-shadow">
-            <p class="${textColor} whitespace-pre-wrap">${formattedMessage}</p>
-            <span class="text-xs text-gray-400 mt-1 block">${new Date().toLocaleTimeString()}</span>
+        <div class="message-bubble ${bubbleClass} rounded-2xl p-4 max-w-[80%] shadow-lg hover:shadow-xl transition-all duration-300">
+            <div class="message-content">
+                <p class="message-text text-white whitespace-pre-wrap">${formattedMessage}</p>
+                ${formatCodeBlocks(formattedMessage)}
+                <div class="message-meta flex items-center space-x-2 mt-2">
+                    <span class="text-xs text-gray-400 opacity-75">${new Date().toLocaleTimeString()}</span>
+                    ${isUser ? '' : '<span class="text-xs text-indigo-400">Aberty AI</span>'}
+                </div>
+            </div>
         </div>
         ${isUser ? `
             <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -76,17 +98,17 @@ function showTypingIndicator() {
     typingDiv.id = 'typing-indicator';
     typingDiv.className = 'message flex items-start space-x-3 opacity-0 transform translate-y-4';
     typingDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg">
             <i class="fas fa-robot text-white text-sm"></i>
         </div>
-        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 shadow-lg border border-white/10 max-w-[60%]">
+        <div class="bot-message rounded-2xl p-4 shadow-lg border border-white/10 max-w-[60%]">
             <div class="flex items-center space-x-2">
                 <div class="typing-dots flex space-x-1">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
-                <span class="text-gray-400 text-sm">Aberty is thinking...</span>
+                <span class="text-gray-300 text-sm">Aberty is thinking...</span>
             </div>
         </div>
     `;
@@ -130,41 +152,107 @@ function isDetailedResponseRequested(message) {
     );
 }
 
-// Update the handleIdentityQuery function
-function handleIdentityQuery(message) {
-    const lowerMessage = message.toLowerCase();
+// Add document handling functions
+const documentHandler = {
+    async readFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            
+            if (file.type === 'application/pdf') {
+                // Handle PDF files
+                reader.readAsArrayBuffer(file);
+            } else {
+                // Handle text files
+                reader.readAsText(file);
+            }
+        });
+    },
+
+    async processPDF(arrayBuffer) {
+        // You'll need to add pdf.js library for this
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+        let text = '';
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(item => item.str).join(' ') + '\n';
+        }
+        
+        return text;
+    },
+
+    async processDocument(file) {
+        try {
+            const content = await this.readFile(file);
+            let text;
+            
+            if (file.type === 'application/pdf') {
+                text = await this.processPDF(content);
+            } else {
+                text = content;
+            }
+            
+            return {
+                name: file.name,
+                type: file.type,
+                content: text,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error('Error processing document:', error);
+            throw error;
+        }
+    }
+};
+
+// Add this to initialize document upload functionality
+function initDocumentUpload() {
+    const uploadBtn = document.getElementById('upload-doc');
+    const fileInput = document.getElementById('doc-upload');
     
-    // Check for questions about the model/technology
-    if (lowerMessage.includes('what model') || 
-        lowerMessage.includes('which model') || 
-        lowerMessage.includes('how do you work') ||
-        lowerMessage.includes('what technology') ||
-        lowerMessage.includes('what language') ||
-        lowerMessage.includes('how were you made')) {
-        return "I apologize, but the details about my underlying model and technology are confidential. What I can tell you is that I'm Aberty, an Alien Intelligence created to assist users like you.";
+    // Load saved documents
+    const savedDocs = localStorage.getItem(DOCS_STORAGE_KEY);
+    if (savedDocs) {
+        uploadedDocuments = JSON.parse(savedDocs);
     }
     
-    // Check for questions about the bot's identity
-    if (lowerMessage.includes('who are you') || 
-        lowerMessage.includes('what are you') || 
-        lowerMessage.includes('tell me about yourself') ||
-        lowerMessage.includes('about bot')) {
-        return `I am ${BOT_INFO.name}, ${BOT_INFO.identity} created by ${BOT_INFO.creator.name} to assist you.`;
-    }
+    uploadBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
     
-    // Check for questions about the developer
-    if (lowerMessage.includes('who created you') || 
-        lowerMessage.includes('who made you') || 
-        lowerMessage.includes('who is your developer') ||
-        lowerMessage.includes('who developed you')) {
-        return `I was created by ${BOT_INFO.creator.name}, ${BOT_INFO.creator.description}. He developed me to assist users like you.`;
-    }
-    
-    // If no identity-related query is detected, return null
-    return null;
+    fileInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        
+        showToast('Processing documents...', 'info');
+        
+        try {
+            for (const file of files) {
+                const doc = await documentHandler.processDocument(file);
+                uploadedDocuments.push(doc);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem(DOCS_STORAGE_KEY, JSON.stringify(uploadedDocuments));
+            
+            showToast(`Successfully processed ${files.length} document(s)`, 'success');
+            addMessage(`I've processed ${files.length} new document(s). You can now ask me questions about them!`, false);
+        } catch (error) {
+            showToast('Error processing documents', 'error');
+        }
+        
+        // Clear input
+        fileInput.value = '';
+    });
 }
 
-// Update the callGeminiAPI function
+// Update the callGeminiAPI function to include document context
 async function callGeminiAPI(userInput) {
     // First check for identity-related queries
     const identityResponse = handleIdentityQuery(userInput);
@@ -174,13 +262,27 @@ async function callGeminiAPI(userInput) {
 
     const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
     
+    // Check if the question is about documents
+    const isDocumentQuery = userInput.toLowerCase().includes('document') || 
+                           userInput.toLowerCase().includes('file') ||
+                           userInput.toLowerCase().includes('pdf') ||
+                           userInput.toLowerCase().includes('text');
+    
+    let contextPrompt = `You are ${BOT_INFO.name}, ${BOT_INFO.identity} created by ${BOT_INFO.creator.name}.`;
+    
+    if (isDocumentQuery && uploadedDocuments.length > 0) {
+        // Add document context
+        contextPrompt += `\n\nI have access to the following documents:\n`;
+        uploadedDocuments.forEach(doc => {
+            contextPrompt += `\n- ${doc.name} (${doc.type})\nContent: ${doc.content}\n`;
+        });
+    }
+    
     const isDetailed = isDetailedResponseRequested(userInput);
     
-    // Add context about the bot's identity and response style to the prompt
-    const contextPrompt = `You are ${BOT_INFO.name}, ${BOT_INFO.identity} created by ${BOT_INFO.creator.name}. 
-                          ${isDetailed ? 'Provide a detailed, comprehensive response with examples and explanations.' : 'Provide a clear, concise response.'} 
-                          If the user asks for technical or coding explanations, include relevant examples.
-                          Question: ${userInput}`;
+    contextPrompt += `\n${isDetailed ? 
+        'Provide a detailed, comprehensive response with examples and explanations.' : 
+        'Provide a clear, concise response.'}\n\nQuestion: ${userInput}`;
     
     try {
         const response = await fetch(`${url}?key=${API_KEY}`, {
@@ -341,6 +443,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         exportChatToPDF();
     });
+
+    if (mobileUtils.isTouch) {
+        initScrollToBottom();
+        initFloatingActions();
+        enhanceMobileInput();
+        enhanceMobileScrolling();
+    }
+
+    initDocumentUpload();
 });
 
 // Function to save chat history to localStorage
@@ -573,6 +684,93 @@ document.head.insertAdjacentHTML('beforeend', `
             25% { transform: rotate(-10deg); }
             75% { transform: rotate(10deg); }
         }
+
+        /* Enhanced Message Bubbles */
+        .message-bubble {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .message-bubble::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message-bubble:hover::before {
+            opacity: 1;
+        }
+
+        /* Better Typography */
+        .message-text {
+            line-height: 1.6;
+            font-size: 1rem;
+            letter-spacing: 0.015em;
+        }
+
+        .code-block {
+            font-family: 'Fira Code', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+        }
+
+        /* Enhanced Scrollbar */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Better Focus States */
+        .focus-ring {
+            @apply ring-2 ring-offset-2 ring-offset-gray-900 ring-indigo-500;
+            outline: none;
+        }
+
+        /* Enhanced Mobile Experience */
+        @media (max-width: 640px) {
+            .message-text {
+                font-size: 0.95rem;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+            }
+
+            .code-block {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+        }
     </style>
 `);
 
@@ -647,13 +845,250 @@ function exportChatToPDF() {
         });
 }
 
-// Add this helper function to format messages
+// Add this function to handle code blocks
+function formatCodeBlocks(message) {
+    if (message.includes('```')) {
+        const codeBlocks = message.match(/```([\s\S]*?)```/g);
+        if (codeBlocks) {
+            return codeBlocks.map(block => {
+                const code = block.replace(/```/g, '').trim();
+                return `
+                    <div class="code-block mt-2">
+                        <pre><code>${escapeHtml(code)}</code></pre>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    return '';
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Update the formatMessage function
 function formatMessage(message) {
-    // Convert markdown-style formatting to HTML
     return message
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-        .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
-        .replace(/```(.*?)```/g, '<pre><code>$1</code></pre>') // Code blocks
-        .replace(/`(.*?)`/g, '<code>$1</code>') // Inline code
-        .replace(/\n/g, '<br>'); // New lines
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+        .replace(/`([^`]+)`/g, '<code class="bg-black/20 px-1 py-0.5 rounded text-sm">$1</code>')
+        .replace(/\n/g, '<br>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-indigo-400 hover:underline" target="_blank">$1</a>');
+}
+
+// Add scroll to bottom button functionality
+function initScrollToBottom() {
+    const chatContainer = document.getElementById('chat-container');
+    const scrollButton = document.createElement('button');
+    scrollButton.className = `
+        fixed bottom-24 right-4 bg-indigo-500 text-white rounded-full p-3 
+        shadow-lg transform scale-0 transition-all duration-300 
+        hover:bg-indigo-600 active:scale-95 z-50
+        sm:bottom-28 sm:right-8
+    `;
+    scrollButton.innerHTML = '<i class="fas fa-chevron-down"></i>';
+    document.body.appendChild(scrollButton);
+
+    // Show/hide scroll button based on scroll position
+    chatContainer.addEventListener('scroll', () => {
+        if (!mobileUtils.isScrolledToBottom(chatContainer)) {
+            scrollButton.style.transform = 'scale(1)';
+        } else {
+            scrollButton.style.transform = 'scale(0)';
+        }
+    });
+
+    // Scroll to bottom with smooth animation
+    scrollButton.addEventListener('click', () => {
+        mobileUtils.vibrate(50);
+        chatContainer.scrollTo({
+            top: chatContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+    });
+}
+
+// Add floating action buttons for mobile
+function initFloatingActions() {
+    const actionButtons = document.createElement('div');
+    actionButtons.className = `
+        fixed bottom-4 right-4 flex flex-col space-y-2 z-50 sm:hidden
+    `;
+    actionButtons.innerHTML = `
+        <button id="mobile-clear" class="p-3 bg-red-500 text-white rounded-full shadow-lg transform transition-all hover:scale-110 active:scale-95">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <button id="mobile-export" class="p-3 bg-indigo-500 text-white rounded-full shadow-lg transform transition-all hover:scale-110 active:scale-95">
+            <i class="fas fa-download"></i>
+        </button>
+    `;
+    document.body.appendChild(actionButtons);
+
+    // Add click handlers with haptic feedback
+    document.getElementById('mobile-clear').addEventListener('click', () => {
+        mobileUtils.vibrate([50, 50, 50]);
+        document.getElementById('clear-chat').click();
+    });
+
+    document.getElementById('mobile-export').addEventListener('click', () => {
+        mobileUtils.vibrate(50);
+        document.getElementById('export-chat').click();
+    });
+}
+
+// Enhance mobile input handling
+function enhanceMobileInput() {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    // Add floating input bar for mobile
+    if (mobileUtils.isTouch) {
+        form.classList.add('sticky', 'bottom-0', 'bg-gray-900/95', 'backdrop-blur-lg', 'z-40', 'px-4', 'py-3');
+    }
+
+    // Better keyboard handling
+    input.addEventListener('focus', () => {
+        if (mobileUtils.isTouch) {
+            setTimeout(() => {
+                window.scrollTo(0, document.body.scrollHeight);
+            }, 300);
+        }
+    });
+
+    // Add swipe actions
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    input.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    input.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+    });
+
+    function handleSwipeGesture() {
+        const swipeDistance = touchEndX - touchStartX;
+        if (Math.abs(swipeDistance) > 100) {
+            if (swipeDistance > 0) {
+                // Swipe right - Clear input
+                input.value = '';
+                mobileUtils.vibrate(50);
+            }
+        }
+    }
+}
+
+// Enhance mobile scrolling
+function enhanceMobileScrolling() {
+    const chatContainer = document.getElementById('chat-container');
+    let touchStartY = 0;
+    let scrolling = false;
+
+    chatContainer.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    });
+
+    chatContainer.addEventListener('touchmove', (e) => {
+        if (!scrolling) {
+            scrolling = true;
+            chatContainer.style.scrollBehavior = 'auto';
+        }
+    });
+
+    chatContainer.addEventListener('touchend', () => {
+        scrolling = false;
+        chatContainer.style.scrollBehavior = 'smooth';
+    });
+}
+
+// Update the toast positioning for mobile
+function showMobileToast(message, type = 'success') {
+    const existingToast = document.querySelector('.toast-message');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `
+        toast-message fixed left-4 right-4 bottom-20 sm:left-auto sm:right-4 sm:bottom-4 
+        bg-gradient-to-r ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg 
+        transform translate-y-20 opacity-0 transition-all duration-500
+        flex items-center justify-center space-x-2 z-50 sm:max-w-md mx-auto sm:mx-0
+    `;
+    
+    toast.innerHTML = `
+        <i class="fas ${icons[type]}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.style.transform = 'translate(0)';
+        toast.style.opacity = '1';
+    }, 100);
+    
+    // Animate out and remove
+    setTimeout(() => {
+        toast.style.transform = 'translate-y-20';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
+// Add document-related commands to the identity handler
+function handleIdentityQuery(message) {
+    const lowerMessage = message.toLowerCase();
+    
+    // Add document-related responses
+    if (lowerMessage.includes('what documents') || 
+        lowerMessage.includes('show documents') || 
+        lowerMessage.includes('list documents')) {
+        if (uploadedDocuments.length === 0) {
+            return "I don't have any documents uploaded yet. You can upload documents using the upload button, and I'll be able to answer questions about them.";
+        }
+        
+        let response = "I have access to the following documents:\n";
+        uploadedDocuments.forEach(doc => {
+            response += `\n- ${doc.name} (uploaded ${new Date(doc.timestamp).toLocaleString()})`;
+        });
+        return response;
+    }
+    
+    // Check for questions about the model/technology
+    if (lowerMessage.includes('what model') || 
+        lowerMessage.includes('which model') || 
+        lowerMessage.includes('how do you work') ||
+        lowerMessage.includes('what technology') ||
+        lowerMessage.includes('what language') ||
+        lowerMessage.includes('how were you made')) {
+        return "I apologize, but the details about my underlying model and technology are confidential. What I can tell you is that I'm Aberty, an Alien Intelligence created to assist users like you.";
+    }
+    
+    // Check for questions about the bot's identity
+    if (lowerMessage.includes('who are you') || 
+        lowerMessage.includes('what are you') || 
+        lowerMessage.includes('tell me about yourself') ||
+        lowerMessage.includes('about bot')) {
+        return `I am ${BOT_INFO.name}, ${BOT_INFO.identity} created by ${BOT_INFO.creator.name} to assist you.`;
+    }
+    
+    // Check for questions about the developer
+    if (lowerMessage.includes('who created you') || 
+        lowerMessage.includes('who made you') || 
+        lowerMessage.includes('who is your developer') ||
+        lowerMessage.includes('who developed you')) {
+        return `I was created by ${BOT_INFO.creator.name}, ${BOT_INFO.creator.description}. He developed me to assist users like you.`;
+    }
+    
+    // If no identity-related query is detected, return null
+    return null;
 } 
