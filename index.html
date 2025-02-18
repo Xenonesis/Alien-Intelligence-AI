@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .chat-container {
+            scrollbar-width: thin;
+            scrollbar-color: #4B5563 transparent;
+        }
+        
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: #4B5563;
+            border-radius: 20px;
+        }
+
+        .message {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-indicator span {
+            animation: blink 1.4s infinite;
+            animation-fill-mode: both;
+            height: 5px;
+            width: 5px;
+            background-color: #3B82F6;
+            display: inline-block;
+            border-radius: 50%;
+            margin: 0 1px;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0% { opacity: 0.1; }
+            20% { opacity: 1; }
+            100% { opacity: 0.1; }
+        }
+
+        .chat-bubble {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-bubble:hover {
+            transform: translateY(-2px);
+        }
+        
+        .user-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .bot-bubble {
+            background: linear-gradient(135deg, #f6f8fb 0%, #f1f4f9 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .message {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            animation: messageIn 0.5s ease forwards;
+        }
+        
+        @keyframes messageIn {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .pulse {
+            animation: pulseGlow 2s infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        }
+        
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        button {
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 h-screen flex flex-col">
+    <div class="container mx-auto p-4 flex-1 flex flex-col max-w-4xl">
+        <!-- Header Section -->
+        <div class="text-center mb-6 slide-in">
+            <div class="inline-flex items-center space-x-3 bg-white/10 px-6 py-3 rounded-full backdrop-blur-lg">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                    <i class="fas fa-robot text-white"></i>
+                </div>
+                <div class="text-left">
+                    <h1 class="text-2xl font-bold text-white">Aberty AI</h1>
+                    <p class="text-gray-300 text-sm">Powered by Alien Intelligence</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white/5 rounded-3xl shadow-2xl flex-1 flex flex-col backdrop-blur-xl border border-white/10 relative overflow-hidden">
+            <!-- Add decorative elements -->
+            <div class="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 pointer-events-none"></div>
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-3xl"></div>
+
+            <!-- Chat Header -->
+            <div class="p-6 border-b border-white/10 flex items-center justify-between relative z-10">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center pulse shadow-lg">
+                        <i class="fas fa-robot text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Aberty AI</h2>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            <p class="text-gray-400 text-sm">Online & Ready</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="export-chat" 
+                            class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all duration-300 flex items-center space-x-2 border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl"
+                            title="Export chat history">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                    <button id="clear-chat" 
+                            class="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-all duration-300 flex items-center space-x-2 border border-red-500/20 hover:border-red-500/30 shadow-lg hover:shadow-xl"
+                            title="Clear chat history">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Clear</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="flex-1 p-6 overflow-y-auto chat-container space-y-6" id="chat-container">
+                <div class="message flex items-start space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 max-w-[80%] shadow-lg border border-white/10">
+                        <p class="text-white">Hello! I'm Aberty AI. How can I assist you today? 🚀</p>
+                        <span class="text-xs text-gray-400 mt-2 block">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-6 border-t border-white/10 relative z-10">
+                <form id="chat-form" class="flex space-x-4">
+                    <div class="flex-1 relative">
+                        <input type="text" id="user-input" 
+                               class="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent shadow-lg"
+                               placeholder="Type your message here...">
+                        <button type="button" 
+                                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-violet-500 transition-colors"
+                                title="Voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <button type="submit" 
+                            class="px-6 py-4 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white hover:opacity-90 transition-all duration-300 flex items-center space-x-2 hover:scale-105 shadow-lg hover:shadow-xl"
+                            title="Send message">
+                        <span>Send</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
