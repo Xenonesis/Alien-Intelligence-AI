@@ -15,7 +15,13 @@ const BOT_INFO = {
     creator: {
         name: 'Aditya',
         description: 'a BCA third year student from Sushant University',
-        role: 'developer'
+        role: 'developer',
+        social: {
+            instagram: 'https://www.instagram.com/i__aditya7/',
+            linkedin: 'https://www.linkedin.com/in/itisaddy/',
+            instagram_id: '@i__aditya7',
+            linkedin_id: '@itisaddy'
+        }
     },
     identity: 'an Alien Intelligence',
     model: {
@@ -105,7 +111,8 @@ const feedbackUtils = {
 function addMessage(message, isUser = false) {
     const chatContainer = document.getElementById('chat-container');
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message flex items-start space-x-3 opacity-0 transform translate-y-4 ${isUser ? 'justify-end' : ''}`;
+    messageDiv.className = `message flex items-start space-x-3 opacity-0 transform translate-y-4 
+                           ${isUser ? 'justify-end' : ''} hover:scale-[1.01] transition-all duration-300`;
     
     const iconClass = isUser ? 'fa-user' : 'fa-robot';
     const bubbleClass = isUser ? 'user-message' : 'bot-message';
@@ -113,35 +120,55 @@ function addMessage(message, isUser = false) {
     
     messageDiv.innerHTML = `
         ${!isUser ? `
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <i class="fas ${iconClass} text-white text-sm"></i>
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 
+                      flex items-center justify-center flex-shrink-0 shadow-lg transform 
+                      hover:scale-110 transition-all duration-300 group">
+                <i class="fas ${iconClass} text-white text-lg group-hover:rotate-12 transition-transform"></i>
+                <div class="absolute inset-0 bg-white/20 rounded-2xl scale-0 group-hover:scale-100 
+                           transition-transform duration-300"></div>
             </div>
         ` : ''}
-        <div class="message-bubble ${bubbleClass} rounded-2xl p-4 max-w-[80%] shadow-lg hover:shadow-xl transition-all duration-300">
-            <div class="message-content">
-                <p class="message-text text-white whitespace-pre-wrap">${formattedMessage}</p>
+        <div class="message-bubble ${bubbleClass} rounded-2xl p-4 max-w-[80%] shadow-lg 
+                   hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-r ${isUser ? 
+                'from-purple-500/5 to-pink-500/5' : 
+                'from-indigo-500/5 to-purple-500/5'} opacity-0 
+                group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="message-content relative z-10">
+                <p class="message-text text-white whitespace-pre-wrap leading-relaxed">${formattedMessage}</p>
                 ${formatCodeBlocks(formattedMessage)}
                 <div class="message-meta flex items-center space-x-2 mt-2">
                     <span class="text-xs text-gray-400 opacity-75">${new Date().toLocaleTimeString()}</span>
-                    ${isUser ? '' : '<span class="text-xs text-indigo-400">Aberty AI</span>'}
+                    ${isUser ? '' : `
+                        <span class="text-xs bg-gradient-to-r from-indigo-400 to-purple-400 
+                                   text-transparent bg-clip-text font-medium">Aberty AI</span>
+                    `}
                 </div>
             </div>
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r ${isUser ? 
+                'from-purple-500/20 to-pink-500/20' : 
+                'from-indigo-500/20 to-purple-500/20'} transform scale-x-0 
+                group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
         </div>
         ${isUser ? `
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-                <i class="fas ${iconClass} text-white text-sm"></i>
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 
+                      flex items-center justify-center flex-shrink-0 shadow-lg transform 
+                      hover:scale-110 transition-all duration-300 group">
+                <i class="fas ${iconClass} text-white text-lg group-hover:rotate-12 transition-transform"></i>
+                <div class="absolute inset-0 bg-white/20 rounded-2xl scale-0 group-hover:scale-100 
+                           transition-transform duration-300"></div>
             </div>
         ` : ''}
     `;
     
     chatContainer.appendChild(messageDiv);
     
-    // Animate the message
-    setTimeout(() => {
-        messageDiv.style.transition = 'all 0.5s ease';
+    // Enhanced animation
+    requestAnimationFrame(() => {
+        messageDiv.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
         messageDiv.style.opacity = '1';
-        messageDiv.style.transform = 'translateY(0)';
-    }, 100);
+        messageDiv.style.transform = 'translateY(0) scale(1)';
+    });
     
     chatContainer.scrollTop = chatContainer.scrollHeight;
     
@@ -158,28 +185,31 @@ function showTypingIndicator() {
     typingDiv.id = 'typing-indicator';
     typingDiv.className = 'message flex items-start space-x-3 opacity-0 transform translate-y-4';
     typingDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-            <i class="fas fa-robot text-white text-sm"></i>
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 
+                   flex items-center justify-center flex-shrink-0 shadow-lg animate-pulse">
+            <i class="fas fa-robot text-white text-lg animate-bounce"></i>
         </div>
-        <div class="bot-message rounded-2xl p-4 shadow-lg border border-white/10 max-w-[60%]">
-            <div class="flex items-center space-x-2">
+        <div class="bot-message rounded-2xl p-4 shadow-lg border border-white/10 max-w-[60%]
+                   bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-xl">
+            <div class="flex items-center space-x-3">
                 <div class="typing-dots flex space-x-1">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    ${Array(3).fill().map(() => `
+                        <span class="w-2 h-2 rounded-full bg-indigo-500/50 animate-pulse"></span>
+                    `).join('')}
                 </div>
-                <span class="text-gray-300 text-sm">Aberty is thinking...</span>
+                <span class="text-gray-300 text-sm font-medium">Aberty is thinking...</span>
             </div>
         </div>
     `;
     
     chatContainer.appendChild(typingDiv);
     
-    // Animate in
-    setTimeout(() => {
+    // Enhanced animation
+    requestAnimationFrame(() => {
+        typingDiv.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
         typingDiv.style.opacity = '1';
         typingDiv.style.transform = 'translateY(0)';
-    }, 10);
+    });
     
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
@@ -1102,7 +1132,19 @@ function formatMessage(message) {
         .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
         .replace(/`([^`]+)`/g, '<code class="bg-black/20 px-1 py-0.5 rounded text-sm">$1</code>')
         .replace(/\n/g, '<br>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-indigo-400 hover:underline" target="_blank">$1</a>');
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => `
+            <a href="${url}" 
+               class="text-indigo-400 hover:underline inline-flex items-center space-x-1 group" 
+               target="_blank" 
+               rel="noopener noreferrer">
+                <span>${text}</span>
+                <i class="fas fa-external-link-alt text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
+            </a>
+            <button class="copy-btn ml-2 text-gray-400 hover:text-indigo-400 transition-colors" 
+                    onclick="navigator.clipboard.writeText('${text}')">
+                <i class="fas fa-copy text-xs"></i>
+            </button>
+        `);
 }
 
 // Add scroll to bottom button functionality
@@ -1341,12 +1383,26 @@ function handleIdentityQuery(message) {
         return `I am ${BOT_INFO.name}, powered by Alien Model - a unique AI implementation created by Aditya using Alien Intelligence technology.`;
     }
     
-    // Developer identity check
+    // Developer identity check with social links
     if (lowerMessage.includes('who created you') || 
         lowerMessage.includes('who made you') || 
         lowerMessage.includes('who is your developer') ||
-        lowerMessage.includes('who developed you')) {
-        return `I was created by Aditya, ${BOT_INFO.creator.description}. He developed me using Alien Model technology from Alien Intelligence to create a unique AI assistant.`;
+        lowerMessage.includes('who developed you') ||
+        lowerMessage.includes('developer contact') ||
+        lowerMessage.includes('creator social') ||
+        lowerMessage.includes('developer social') ||
+        lowerMessage.includes('aditya social') ||
+        lowerMessage.includes('contact developer') ||
+        lowerMessage.includes('developer profile') ||
+        lowerMessage.includes('creator profile') ||
+        lowerMessage.includes('developer instagram') ||
+        lowerMessage.includes('developer linkedin')) {
+        
+        return `I was created by Aditya, ${BOT_INFO.creator.description}. You can connect with him on:
+• Instagram: [${BOT_INFO.creator.social.instagram_id}](${BOT_INFO.creator.social.instagram})
+• LinkedIn: [${BOT_INFO.creator.social.linkedin_id}](${BOT_INFO.creator.social.linkedin})
+
+Click the links to visit his profiles or copy the IDs to find him on social media.`;
     }
     
     // Add document-related responses
