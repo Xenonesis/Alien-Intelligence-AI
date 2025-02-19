@@ -9,7 +9,7 @@ const DOCS_STORAGE_KEY = 'aberty_documents';
 let chatHistory = [];
 let uploadedDocuments = [];
 
-// Add these constants at the top
+// Update the BOT_INFO constant with more specific model details
 const BOT_INFO = {
     name: 'Aberty',
     creator: {
@@ -18,6 +18,20 @@ const BOT_INFO = {
         role: 'developer'
     },
     identity: 'an Alien Intelligence',
+    model: {
+        name: 'Alien Model',
+        type: 'Advanced Multimodal AI',
+        creator: 'Alien Intelligence',
+        developer: 'Aditya',
+        description: 'a unique AI model that combines advanced intelligence with alien technology',
+        capabilities: [
+            'Natural Language Processing',
+            'Context Understanding',
+            'Document Analysis',
+            'Code Generation',
+            'Multimodal Interactions'
+        ]
+    },
     responseStyle: {
         default: 'concise',
         detailed: 'detailed'
@@ -1253,9 +1267,87 @@ function showMobileToast(message, type = 'success') {
     }, 3000);
 }
 
-// Add document-related commands to the identity handler
+// Update the handleIdentityQuery function with more model-related questions
 function handleIdentityQuery(message) {
     const lowerMessage = message.toLowerCase();
+    
+    // Expanded list of model-related queries
+    const modelRelatedQueries = [
+        'what model',
+        'which model',
+        'how do you work',
+        'what technology',
+        'what language',
+        'how were you made',
+        'multimodal',
+        'are you gpt',
+        'what ai',
+        'what llm',
+        'what data',
+        'which ai',
+        'based on',
+        'trained on',
+        // Add more model-related queries
+        'what framework',
+        'what architecture',
+        'are you claude',
+        'are you gemini',
+        'are you bard',
+        'are you anthropic',
+        'are you openai',
+        'are you chatgpt',
+        'which llm',
+        'what backend',
+        'what foundation',
+        'what base model',
+        'what training',
+        'your training',
+        'your model',
+        'model type',
+        'ai type',
+        'ai model',
+        'built on',
+        'powered by',
+        'based upon',
+        'framework used',
+        'technology stack',
+        'tech stack',
+        'underlying model',
+        'model architecture',
+        'ai framework',
+        'ai technology',
+        'what powers you',
+        'what drives you',
+        'what platform',
+        'platform used',
+        'developed using',
+        'developed with',
+        'built with',
+        'created using',
+        'based in',
+        'running on'
+    ];
+    
+    // Check if message contains any model-related queries
+    if (modelRelatedQueries.some(query => lowerMessage.includes(query))) {
+        return `I'm based on Alien Model by Alien Intelligence, created by Aditya. I'm a unique implementation of advanced Alien technology, different from conventional AI models.`;
+    }
+    
+    // Rest of the identity checks remain the same...
+    if (lowerMessage.includes('who are you') || 
+        lowerMessage.includes('what are you') || 
+        lowerMessage.includes('tell me about yourself') ||
+        lowerMessage.includes('about bot')) {
+        return `I am ${BOT_INFO.name}, powered by Alien Model - a unique AI implementation created by Aditya using Alien Intelligence technology.`;
+    }
+    
+    // Developer identity check
+    if (lowerMessage.includes('who created you') || 
+        lowerMessage.includes('who made you') || 
+        lowerMessage.includes('who is your developer') ||
+        lowerMessage.includes('who developed you')) {
+        return `I was created by Aditya, ${BOT_INFO.creator.description}. He developed me using Alien Model technology from Alien Intelligence to create a unique AI assistant.`;
+    }
     
     // Add document-related responses
     if (lowerMessage.includes('what documents') || 
@@ -1270,32 +1362,6 @@ function handleIdentityQuery(message) {
             response += `\n- ${doc.name} (uploaded ${new Date(doc.timestamp).toLocaleString()})`;
         });
         return response;
-    }
-    
-    // Check for questions about the model/technology
-    if (lowerMessage.includes('what model') || 
-        lowerMessage.includes('which model') || 
-        lowerMessage.includes('how do you work') ||
-        lowerMessage.includes('what technology') ||
-        lowerMessage.includes('what language') ||
-        lowerMessage.includes('how were you made')) {
-        return "I apologize, but the details about my underlying model and technology are confidential. What I can tell you is that I'm Aberty, an Alien Intelligence created to assist users like you.";
-    }
-    
-    // Check for questions about the bot's identity
-    if (lowerMessage.includes('who are you') || 
-        lowerMessage.includes('what are you') || 
-        lowerMessage.includes('tell me about yourself') ||
-        lowerMessage.includes('about bot')) {
-        return `I am ${BOT_INFO.name}, ${BOT_INFO.identity} created by ${BOT_INFO.creator.name} to assist you.`;
-    }
-    
-    // Check for questions about the developer
-    if (lowerMessage.includes('who created you') || 
-        lowerMessage.includes('who made you') || 
-        lowerMessage.includes('who is your developer') ||
-        lowerMessage.includes('who developed you')) {
-        return `I was created by ${BOT_INFO.creator.name}, ${BOT_INFO.creator.description}. He developed me to assist users like you.`;
     }
     
     // If no identity-related query is detected, return null
