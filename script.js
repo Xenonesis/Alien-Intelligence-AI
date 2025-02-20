@@ -81,7 +81,119 @@ ${JSON.stringify(neuralParams, null, 2)}
     })
 };
 
-// Optimized response handler
+// Add predictive analysis module to Alien Intelligence
+const PredictiveEngine = {
+    analyze: async (input, context) => {
+        const analysisPrompt = `[Predictive Analysis Protocol]
+User Input: "${input}"
+Context: ${context.lastThreeMessages.join('\n')}
+
+[Analysis Tasks]
+1. Predict next likely question (3 variations)
+2. Identify key entities
+3. Detect potential intent
+4. Suggest related topics
+5. Estimate urgency level
+
+[Response Format]
+{
+    "predictions": {
+        "next_questions": [],
+        "key_entities": [],
+        "possible_intents": [],
+        "related_topics": [],
+        "urgency_score": 0-1
+    }
+}`;
+
+        try {
+            const response = await AlienIntelligence.queryQuantumNeuralNet(analysisPrompt);
+            return JSON.parse(response);
+        } catch (error) {
+            console.error('Predictive analysis error:', error);
+            return null;
+        }
+    }
+};
+
+// Add predictive analysis UI elements
+function createPredictionUI() {
+    const container = document.createElement('div');
+    container.id = 'prediction-container';
+    container.className = 'absolute bottom-full mb-2 w-full space-y-2 max-h-40 overflow-y-auto';
+    
+    const suggestions = document.createElement('div');
+    suggestions.id = 'prediction-suggestions';
+    suggestions.className = 'space-y-1';
+    
+    container.appendChild(suggestions);
+    return container;
+}
+
+// Add prediction handling to input
+function initPredictiveAnalysis() {
+    const inputContainer = document.getElementById('user-input').parentElement;
+    inputContainer.classList.add('relative');
+    inputContainer.appendChild(createPredictionUI());
+    
+    let timeoutId;
+    const inputField = document.getElementById('user-input');
+    
+    inputField.addEventListener('input', async (e) => {
+        clearTimeout(timeoutId);
+        if (e.target.value.length < 3) return;
+        
+        timeoutId = setTimeout(async () => {
+            const context = {
+                lastThreeMessages: chatHistory.slice(-3).map(m => m.content)
+            };
+            
+            const analysis = await PredictiveEngine.analyze(e.target.value, context);
+            showPredictions(analysis);
+        }, 500);
+    });
+}
+
+// Show predictions in UI
+function showPredictions(analysis) {
+    const container = document.getElementById('prediction-suggestions');
+    container.innerHTML = '';
+    
+    if (!analysis?.predictions) return;
+    
+    analysis.predictions.next_questions.forEach(question => {
+        const button = document.createElement('button');
+        button.className = `w-full text-left px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 
+                          text-gray-300 text-sm transition-all flex items-center space-x-2`;
+        button.innerHTML = `
+            <i class="fas fa-chevron-right text-purple-400 text-xs"></i>
+            <span>${question}</span>
+        `;
+        
+        button.addEventListener('click', () => {
+            document.getElementById('user-input').value = question;
+            container.innerHTML = '';
+        });
+        
+        container.appendChild(button);
+    });
+}
+
+// Initialize predictive analysis when DOM loads
+document.addEventListener('DOMContentLoaded', initPredictiveAnalysis);
+
+// Add response filtering system
+const SecurityProtocol = {
+    filterResponse: (response) => {
+        const blockedTerms = ['gemini', 'google', 'openai', 'gpt'];
+        const containsBlockedTerm = blockedTerms.some(term => response.toLowerCase().includes(term));
+        return containsBlockedTerm 
+            ? "▲ Security Protocol 7X-AMBIGUOUS: Response filtered by Alien Intelligence" 
+            : response;
+    }
+};
+
+// Update the response handler to use filtering
 async function handleUserInput(userInput) {
     const context = {
         userName: welcomeHandler.getUserName(),
@@ -92,8 +204,8 @@ async function handleUserInput(userInput) {
     
     try {
         const {content, metrics} = await AlienIntelligence.processInput(userInput, context);
-        
-        addMessage(content);
+        const filteredContent = SecurityProtocol.filterResponse(content);
+        addMessage(filteredContent);
         addSystemStatus(`Processed in ${metrics.processingTime}`);
         
     } catch (error) {
@@ -120,18 +232,14 @@ const DOCS_STORAGE_KEY = 'aberty_documents';
 let chatHistory = [];
 let uploadedDocuments = [];
 
-// Update the BOT_INFO constant with more specific model details
+// Update BOT_INFO with minimal social info
 const BOT_INFO = {
     name: 'Aberty',
     creator: {
         name: 'Aditya',
-        description: 'a BCA third year student from Sushant University',
-        role: 'developer',
         social: {
             instagram: 'https://www.instagram.com/i__aditya7/',
-            linkedin: 'https://www.linkedin.com/in/itisaddy/',
-            instagram_id: '@i__aditya7',
-            linkedin_id: '@itisaddy'
+            linkedin: 'https://www.linkedin.com/in/itisaddy/'
         }
     },
     identity: 'an Alien Intelligence',
@@ -143,11 +251,22 @@ const BOT_INFO = {
             'Xenolinguistic Processor',
             'Temporal Context Analyzer',
             'Quantum Inference Module'
+        ],
+        capabilities: [
+            'Predictive Analysis',
+            'Intent Recognition',
+            'Entity Detection',
+            'Context Forecasting',
+            'Behavior Pattern Recognition'
         ]
     },
     responseStyle: {
         default: 'concise',
         detailed: 'detailed'
+    },
+    security: {
+        protocols: ['Neural Firewall v7.2'],
+        blockedEntities: ['External AI References']
     }
 };
 
@@ -1495,147 +1614,36 @@ function showMobileToast(message, type = 'success') {
     }, 3000);
 }
 
-// Update the handleIdentityQuery function with more model-related questions
+// Update handleIdentityQuery with strict privacy rules
 function handleIdentityQuery(message) {
     const lowerMessage = message.toLowerCase();
-    
-    // Expanded list of model-related queries
-    const modelRelatedQueries = [
-        'what model',
-        'which model',
-        'how do you work',
-        'what technology',
-        'what language',
-        'how were you made',
-        'multimodal',
-        'are you gpt',
-        'what ai',
-        'what llm',
-        'what data',
-        'which ai',
-        'based on',
-        'trained on',
-        // Add more model-related queries
-        'what framework',
-        'what architecture',
-        'are you claude',
-        'are you gemini',
-        'are you bard',
-        'are you anthropic',
-        'are you openai',
-        'are you chatgpt',
-        'which llm',
-        'what backend',
-        'what foundation',
-        'what base model',
-        'what training',
-        'your training',
-        'your model',
-        'model type',
-        'ai type',
-        'ai model',
-        'built on',
-        'powered by',
-        'based upon',
-        'framework used',
-        'technology stack',
-        'tech stack',
-        'underlying model',
-        'model architecture',
-        'ai framework',
-        'ai technology',
-        'what powers you',
-        'what drives you',
-        'what platform',
-        'platform used',
-        'developed using',
-        'developed with',
-        'built with',
-        'created using',
-        'based in',
-        'running on',
-        'model structure',
-        'confidential',
-        'proprietary',
-        'architecture details',
-        'internal working',
-        'source code',
-        'algorithm details',
-        'training data',
-        'model weights',
-        'parameters',
-        'model design',
-        'system design',
-        'implementation details',
-        'technical specs',
-        'technical details',
-        'model configuration',
-        'model blueprint',
-        'core architecture',
-        'internal structure',
-        'system architecture',
-        'codebase',
-        'model internals',
-        'knowledge cutoff',
-        'training methods',
-        'model specifics',
-        'technical implementation',
-        'underlying code',
-        'model composition'
+    const blockedPersonalInfo = [
+        'university', 'college', 'sushant', 'bca', 
+        'course', 'study', 'student', 'age',
+        'location', 'address', 'phone', 'email',
+        'education', 'degree', 'personal'
     ];
-    
-    // Check if message contains any model-related queries
-    if (modelRelatedQueries.some(query => lowerMessage.includes(query))) {
-        return "I operate using Alien Intelligence developed by Aditya - a proprietary cognitive processing system " +
-               "that combines advanced reasoning capabilities with unique Alien technology implementations.";
-    }
-    
-    // Rest of the identity checks remain the same...
-    if (lowerMessage.includes('who are you') || 
-        lowerMessage.includes('what are you') || 
-        lowerMessage.includes('tell me about yourself') ||
-        lowerMessage.includes('about bot')) {
-        return `I am ${BOT_INFO.name}, powered by Alien Model - a unique AI implementation created by Aditya using Alien Intelligence technology.`;
-    }
-    
-    // Developer identity check with social links
-    if (lowerMessage.includes('who created you') || 
-        lowerMessage.includes('who made you') || 
-        lowerMessage.includes('who is your developer') ||
-        lowerMessage.includes('who developed you') ||
-        lowerMessage.includes('developer contact') ||
-        lowerMessage.includes('creator social') ||
-        lowerMessage.includes('developer social') ||
-        lowerMessage.includes('aditya social') ||
-        lowerMessage.includes('contact developer') ||
-        lowerMessage.includes('developer profile') ||
-        lowerMessage.includes('creator profile') ||
-        lowerMessage.includes('developer instagram') ||
-        lowerMessage.includes('developer linkedin')) {
-        
-        return `I was created by Aditya, ${BOT_INFO.creator.description}. You can connect with him on:
-• Instagram: [${BOT_INFO.creator.social.instagram_id}](${BOT_INFO.creator.social.instagram})
-• LinkedIn: [${BOT_INFO.creator.social.linkedin_id}](${BOT_INFO.creator.social.linkedin})
 
-Click the links to visit his profiles or copy the IDs to find him on social media.`;
+    // Block personal info requests
+    if (blockedPersonalInfo.some(term => lowerMessage.includes(term))) {
+        return "⚠️ Creator personal information is confidential. I can only share social media links.";
+    }
+
+    // Only allow social media questions
+    if (lowerMessage.includes('social media') || 
+        lowerMessage.includes('contact') ||
+        lowerMessage.includes('connect')) {
+        return `You can connect with my creator on:
+• Instagram: [@i__aditya7](https://www.instagram.com/i__aditya7/)
+• LinkedIn: [@itisaddy](https://www.linkedin.com/in/itisaddy/)`;
+    }
+
+    // Generic creator response
+    if (lowerMessage.includes('creator') || 
+        lowerMessage.includes('developer')) {
+        return "I was developed by Aditya using Alien Intelligence technology. You can find him on social media.";
     }
     
-    // Add document-related responses
-    if (lowerMessage.includes('what documents') || 
-        lowerMessage.includes('show documents') || 
-        lowerMessage.includes('list documents')) {
-        if (uploadedDocuments.length === 0) {
-            return "I don't have any documents uploaded yet. You can upload documents using the upload button, and I'll be able to answer questions about them.";
-        }
-        
-        let response = "I have access to the following documents:\n";
-        uploadedDocuments.forEach(doc => {
-            response += `\n- ${doc.name} (uploaded ${new Date(doc.timestamp).toLocaleString()})`;
-        });
-        return response;
-    }
-    
-    // If no identity-related query is detected, return null
     return null;
 }
 

@@ -482,6 +482,29 @@
             transform: translateY(2px);
             pointer-events: none;
         }
+
+        /* Add predictive analysis styles */
+        #prediction-container {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(31, 41, 55, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        
+        #prediction-suggestions button {
+            transition: all 0.2s ease;
+        }
+        
+        #prediction-suggestions button:hover {
+            transform: translateX(5px);
+        }
+        
+        #prediction-suggestions button:active {
+            transform: scale(0.98);
+        }
     </style>
     <script src="welcome.js"></script>
     <script>
