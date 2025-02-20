@@ -71,8 +71,10 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 - 🌈 Enhanced gradient effects
 - 🛠️ Context-aware tooltips
 
-## 🛠️ Core Technology
-- Alien Intelligence Processing System
+## ��️ Core Technology
+- **Alien Neural Matrix** - Advanced quantum processing system
+- **Quantum Cognition Engine** v7.2
+- **Xenolinguistic Interface Protocol**
 
 ## 🚀 Getting Started
 1. Clone the repository

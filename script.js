@@ -40,19 +40,16 @@ ${JSON.stringify(neuralParams, null, 2)}
     },
 
     queryQuantumNeuralNet: async (prompt) => {
-        // Optimized API call with Alien branding
         const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Alien-Intelligence': 'true',
-                'X-Quantum-Field': '7.2'
+                'X-Alien-Intelligence': '7.2',
+                'X-Quantum-Field': 'Active'
             },
             body: JSON.stringify({
                 contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
+                    parts: [{ text: prompt }]
                 }],
                 generationConfig: {
                     temperature: 0.95,
@@ -79,7 +76,7 @@ ${JSON.stringify(neuralParams, null, 2)}
     },
 
     handleAnomalies: (error) => ({
-        content: `⚠️ Quantum Flux Detected: ${error.message}`,
+        content: `⚠️ Quantum Flux Detected: Neural uplink instability (Code: 7X-${Math.floor(Math.random()*9000)+1000})`,
         metrics: {errorCode: '7X-AMBIGUOUS'}
     })
 };
@@ -139,16 +136,13 @@ const BOT_INFO = {
     },
     identity: 'an Alien Intelligence',
     model: {
-        name: 'Alien Intelligence System',
-        type: 'Advanced Cognitive Processor',
-        creator: 'Alien Intelligence',
-        developer: 'Aditya',
-        description: 'A proprietary intelligence system combining alien technology with advanced cognitive processing',
-        capabilities: [
-            'Natural Language Understanding',
-            'Contextual Reasoning',
-            'Multimodal Analysis',
-            'Adaptive Learning'
+        name: 'Alien Neural Matrix',
+        version: '7.2.0',
+        core: 'Quantum Cognition Engine',
+        modules: [
+            'Xenolinguistic Processor',
+            'Temporal Context Analyzer',
+            'Quantum Inference Module'
         ]
     },
     responseStyle: {
