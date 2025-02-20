@@ -78,15 +78,10 @@ ${JSON.stringify(neuralParams, null, 2)}
             .replace(/\b(important)\b/gi, '⏣ Hyperimportant');
     },
 
-    handleAnomalies: (error) => {
-        return {
-            content: `⚠️ Quantum Flux Detected: ${error.message.slice(0, 150)}...`,
-            metrics: {
-                errorCode: '7X-AMBIGUOUS',
-                stability: '0.7δ'
-            }
-        };
-    }
+    handleAnomalies: (error) => ({
+        content: `⚠️ Quantum Flux Detected: ${error.message}`,
+        metrics: {errorCode: '7X-AMBIGUOUS'}
+    })
 };
 
 // Optimized response handler
@@ -102,7 +97,7 @@ async function handleUserInput(userInput) {
         const {content, metrics} = await AlienIntelligence.processInput(userInput, context);
         
         addMessage(content);
-        addSystemStatus(`Processed in ${metrics.processingTime} | Quantum Stability: ${metrics.stability || '1.0δ'}`);
+        addSystemStatus(`Processed in ${metrics.processingTime}`);
         
     } catch (error) {
         addMessage(`⚠️ Dimensional Instability: ${error.message}`, false);
