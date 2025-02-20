@@ -76,7 +76,7 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 
 ## 🚀 Getting Started
 1. Clone the repository
-2. Set up your Google Gemini API key
+2. Setup your NLP
 3. Open `index.html` in your browser
 4. Start chatting with Aberty!
 

@@ -1,3 +1,122 @@
+// Alien Intelligence Core Processor
+const AlienIntelligence = {
+    processInput: async (input, context) => {
+        const neuralParams = {
+            quantumEntanglement: 0.92,
+            temporalFold: 1.47,
+            neuroplasticity: 0.85
+        };
+
+        const alienPrompt = `[Alien Intelligence Protocol v7.2]
+User: ${context.userName || "Unknown Entity"}
+Request: ${input}
+Context: ${context.lastThreeMessages}
+
+[Quantum Neural Parameters]
+${JSON.stringify(neuralParams, null, 2)}
+
+[Response Guidelines]
+- Apply xenolinguistic patterns
+- Optimize for transdimensional comprehension
+- Integrate quantum knowledge bases
+- Maintain non-linear temporal awareness`;
+
+        try {
+            const start = performance.now();
+            const response = await this.queryQuantumNeuralNet(alienPrompt);
+            const processingTime = ((performance.now() - start)/1000).toFixed(2);
+            
+            return {
+                content: this.applyAlienEnhancements(response),
+                metrics: {
+                    processingTime: `${processingTime}s`,
+                    quantumUnits: Math.floor(Math.random() * 42) + 1,
+                    temporalOffset: neuralParams.temporalFold.toFixed(2)
+                }
+            };
+        } catch (error) {
+            return this.handleAnomalies(error);
+        }
+    },
+
+    queryQuantumNeuralNet: async (prompt) => {
+        // Optimized API call with Alien branding
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Alien-Intelligence': 'true',
+                'X-Quantum-Field': '7.2'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: prompt
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.95,
+                    topK: 55,
+                    topP: 0.99,
+                    maxOutputTokens: 1250,
+                    quantumAcceleration: true
+                }
+            })
+        });
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text;
+    },
+
+    applyAlienEnhancements: (text) => {
+        // Add Alien-style formatting
+        return text
+            .replace(/\b(suggest|recommend)\b/gi, '▲ Quantum analysis suggests')
+            .replace(/\b(however)\b/gi, '◼︎ Temporal anomaly detected')
+            .replace(/\b(please note)\b/gi, '⚠️ Xenological advisory')
+            .replace(/(\d+) steps/gi, '$1 quantum iterations')
+            .replace(/\b(important)\b/gi, '⏣ Hyperimportant');
+    },
+
+    handleAnomalies: (error) => {
+        return {
+            content: `⚠️ Quantum Flux Detected: ${error.message.slice(0, 150)}...`,
+            metrics: {
+                errorCode: '7X-AMBIGUOUS',
+                stability: '0.7δ'
+            }
+        };
+    }
+};
+
+// Optimized response handler
+async function handleUserInput(userInput) {
+    const context = {
+        userName: welcomeHandler.getUserName(),
+        lastThreeMessages: chatHistory.slice(-3).map(m => m.content)
+    };
+
+    showTypingIndicator();
+    
+    try {
+        const {content, metrics} = await AlienIntelligence.processInput(userInput, context);
+        
+        addMessage(content);
+        addSystemStatus(`Processed in ${metrics.processingTime} | Quantum Stability: ${metrics.stability || '1.0δ'}`);
+        
+    } catch (error) {
+        addMessage(`⚠️ Dimensional Instability: ${error.message}`, false);
+    }
+}
+
+// New system status display
+function addSystemStatus(status) {
+    const statusBar = document.getElementById('system-status');
+    statusBar.textContent = `▲ Alien Intelligence v7.2: ${status}`;
+    statusBar.classList.add('animate-pulse');
+    setTimeout(() => statusBar.classList.remove('animate-pulse'), 1000);
+}
+
 // Your Gemini API key
 const API_KEY = 'AIzaSyCYZrSd57RHna4ujKA5Q_rCRJ18oLe7z2o';
 
@@ -106,6 +225,39 @@ const feedbackUtils = {
     }
 };
 
+// Add user behavior tracking
+const userBehavior = {
+    history: [],
+    preferences: {
+        responseStyle: 'default',
+        topics: []
+    },
+    
+    trackInteraction(type, data) {
+        this.history.push({
+            timestamp: new Date().toISOString(),
+            type,
+            data
+        });
+        localStorage.setItem('aberty_user_behavior', JSON.stringify(this.history));
+    },
+    
+    updatePreferences(newPrefs) {
+        this.preferences = {...this.preferences, ...newPrefs};
+        localStorage.setItem('aberty_user_prefs', JSON.stringify(this.preferences));
+    },
+    
+    loadFromStorage() {
+        const storedHistory = localStorage.getItem('aberty_user_behavior');
+        const storedPrefs = localStorage.getItem('aberty_user_prefs');
+        if (storedHistory) this.history = JSON.parse(storedHistory);
+        if (storedPrefs) this.preferences = JSON.parse(storedPrefs);
+    }
+};
+
+// Initialize behavior tracking
+userBehavior.loadFromStorage();
+
 // Function to add messages to the chat container
 function addMessage(message, isUser = false) {
     const chatContainer = document.getElementById('chat-container');
@@ -201,6 +353,14 @@ function addMessage(message, isUser = false) {
     // Add timestamp to chat history when saving
     if (chatHistory.length > 0 && !chatHistory[chatHistory.length - 1].timestamp) {
         chatHistory[chatHistory.length - 1].timestamp = new Date().toLocaleString();
+    }
+
+    if (isUser) {
+        userBehavior.trackInteraction('user_message', {
+            length: message.length,
+            containsQuestion: /\?$/.test(message),
+            topics: detectTopics(message)
+        });
     }
 }
 
@@ -451,14 +611,14 @@ async function callGeminiAPI(userInput) {
         const data = await response.json();
         
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error('Invalid response structure from API');
+            throw new Error('Invalid response structure from Data');
         }
 
         return data.candidates[0].content.parts[0].text;
     } catch (error) {
         console.error('API Error:', error);
         if (error.message.includes('API key')) {
-            return 'Error: Invalid API key. Please check your API key configuration.';
+            return 'Error: Invalid Data key. Please check your Data  configuration.';
         }
         return `I encountered an error: ${error.message}. Please try again.`;
     }
@@ -1477,4 +1637,35 @@ Click the links to visit his profiles or copy the IDs to find him on social medi
     
     // If no identity-related query is detected, return null
     return null;
+}
+
+// Helper functions
+function detectTopics(message) {
+    const topics = [];
+    const lowerMsg = message.toLowerCase();
+    
+    if (/(code|programming|algorithm)/.test(lowerMsg)) topics.push('coding');
+    if (/(document|file|pdf|text)/.test(lowerMsg)) topics.push('documents');
+    if (/(explain|what is|how does)/.test(lowerMsg)) topics.push('explanations');
+    if (/(joke|funny|humor)/.test(lowerMsg)) topics.push('humor');
+    
+    return topics;
+}
+
+function getResponseGuidelines(behavior, prefs) {
+    const guidelines = [];
+    
+    if (prefs.responseStyle === 'detailed') {
+        guidelines.push('detailed explanation with examples');
+    }
+    
+    if (behavior.some(b => b.data.containsQuestion)) {
+        guidelines.push('address previous questions contextually');
+    }
+    
+    if (prefs.topics.length > 0) {
+        guidelines.push(`focus on ${prefs.topics.join('/')} topics`);
+    }
+    
+    return guidelines.join(', ');
 } 
