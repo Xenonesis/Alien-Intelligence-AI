@@ -425,6 +425,46 @@
                 box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
             }
         }
+
+        /* New animations */
+        @keyframes ping-slow {
+            0% { opacity: 0.8; transform: scale(0.8); }
+            50% { opacity: 0; transform: scale(1.4); }
+            100% { opacity: 0; transform: scale(1.4); }
+        }
+        .animate-ping-slow {
+            animation: ping-slow 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .message-bubble {
+                max-width: 90% !important;
+                padding: 1rem !important;
+            }
+            .copy-btn {
+                right: -0.5rem !important;
+                top: -0.5rem !important;
+                padding: 0.5rem !important;
+            }
+            .message-text {
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+            .message-meta {
+                margin-top: 0.75rem;
+            }
+        }
+
+        /* Desktop enhancements */
+        @media (min-width: 641px) {
+            .message-bubble {
+                max-width: 75%;
+            }
+            .copy-btn {
+                transition: all 0.3s ease;
+            }
+        }
     </style>
     <script src="welcome.js"></script>
     <script>

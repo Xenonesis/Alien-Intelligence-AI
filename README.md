@@ -1,6 +1,6 @@
 # Alien Intelligence AI (Aberty)
 
-![Aberty AI]
+![Aberty AI Banner]
 
 ## 🚀 Live Demo
 [Try Aberty AI Live](https://alienintelligenceai.netlify.app/)
@@ -26,6 +26,11 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 - 🎯 Enhanced user feedback
 - 🌟 Interactive welcome popup
 - 🎭 Dynamic favicon animation
+- 📋 One-Copy Response Copying
+- 📱 Enhanced Mobile Experience
+- 🖥️ Refined Desktop Interface
+- 📌 Context-Aware Responses
+- 🔔 Interactive Toast Notifications
 
 ### Document Handling
 - 📁 Support for multiple file formats (PDF, TXT, DOC, DOCX)
@@ -40,11 +45,16 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 - 🔝 Floating action buttons
 - ⌨️ Enhanced mobile keyboard handling
 - 📱 Mobile-specific menu
+- 📲 Always-visible copy buttons
+- 👆 Larger touch targets
+- 📱 Optimized message spacing
+- 🔄 Improved keyboard handling
+- 📜 Better scroll behavior
 
 ### User Personalization
 - 👋 Personal greeting system
 - 🔄 Visit tracking
-- 💾 Name remembering
+- �� Name remembering
 - 🎨 Customized responses
 - 📅 Session management
 
@@ -54,13 +64,15 @@ Aberty is an advanced AI chatbot powered by Alien Intelligence, created by Adity
 - 💾 Automatic saving
 - 🔄 Session persistence
 
-## 🛠️ Technologies Used
-- HTML5
-- TailwindCSS
-- JavaScript
-- Google Gemini API
-- PDF.js
-- HTML2PDF.js
+### Desktop Improvements
+- 💻 Wider message containers
+- 🖱️ Hover-to-reveal controls
+- 🎚️ Responsive width management
+- 🌈 Enhanced gradient effects
+- 🛠️ Context-aware tooltips
+
+## 🛠️ Core Technology
+- Alien Intelligence Processing System
 
 ## 🚀 Getting Started
 1. Clone the repository
@@ -92,6 +104,11 @@ Aberty AI is fully optimized for mobile devices with:
 - Loading indicators
 - Welcome popup
 - Animated favicon
+- 🎭 Dynamic Glassmorphism Design
+- 🌈 Gradient Overlays
+- 📌 Interactive Message Bubbles
+- 🔔 Smart Notifications
+- 📋 Clipboard Integration
 
 ## 👨‍💻 Developer
 Created by Aditya
@@ -102,9 +119,40 @@ Created by Aditya
 ## 🔗 Links
 - [Live Demo](https://alienintelligenceai.netlify.app/)
 - [GitHub Repository](https://github.com/Xenonesis/Alien-Intelligence-AI)
+- [Instagram](https://www.instagram.com/i__aditya7/)
+- [LinkedIn](https://www.linkedin.com/in/itisaddy/)
 
 ## 📄 License
 This project is licensed under the MIT License - see the LICENSE.md file for details
 
+## �� Recent Updates
+### UI Enhancements
+- **Animated Message Effects**: Subtle ping animations for new messages
+- **Smart Copy Functionality**: 
+  - Copy button with hover effects
+  - Visual feedback on copy
+  - Mobile-optimized placement
+- **Enhanced Interactions**:
+  - Smooth message transitions
+  - Improved touch targets
+  - Dynamic scaling animations
+
+### Mobile Experience
+- 📲 Always-visible copy buttons
+- 👆 Larger touch targets
+- 📱 Optimized message spacing
+- 🔄 Improved keyboard handling
+- 📜 Better scroll behavior
+
+### Desktop Improvements
+- 💻 Wider message containers
+- 🖱️ Hover-to-reveal controls
+- 🎚️ Responsive width management
+- 🌈 Enhanced gradient effects
+- 🛠️ Context-aware tooltips
+
 ---
-Made by Aditya | Powered by Alien Intelligence @ 2025
+
+🛸 Powered by Alien Intelligence Technology  
+💻 Developed by Aditya @ Sushant University  
+🚀 Version 2.1.0 | 2025 Release

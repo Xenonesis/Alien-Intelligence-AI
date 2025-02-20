@@ -25,17 +25,16 @@ const BOT_INFO = {
     },
     identity: 'an Alien Intelligence',
     model: {
-        name: 'Alien Model',
-        type: 'Advanced Multimodal AI',
+        name: 'Alien Intelligence System',
+        type: 'Advanced Cognitive Processor',
         creator: 'Alien Intelligence',
         developer: 'Aditya',
-        description: 'a unique AI model that combines advanced intelligence with alien technology',
+        description: 'A proprietary intelligence system combining alien technology with advanced cognitive processing',
         capabilities: [
-            'Natural Language Processing',
-            'Context Understanding',
-            'Document Analysis',
-            'Code Generation',
-            'Multimodal Interactions'
+            'Natural Language Understanding',
+            'Contextual Reasoning',
+            'Multimodal Analysis',
+            'Adaptive Learning'
         ]
     },
     responseStyle: {
@@ -130,6 +129,9 @@ function addMessage(message, isUser = false) {
         ` : ''}
         <div class="message-bubble ${bubbleClass} rounded-2xl p-4 max-w-[80%] shadow-lg 
                    hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+            <!-- Ping animation element -->
+            ${!isUser ? `<div class="absolute -inset-1 bg-purple-500/20 rounded-2xl animate-ping-slow"></div>` : ''}
+            
             <div class="absolute inset-0 bg-gradient-to-r ${isUser ? 
                 'from-purple-500/5 to-pink-500/5' : 
                 'from-indigo-500/5 to-purple-500/5'} opacity-0 
@@ -137,6 +139,16 @@ function addMessage(message, isUser = false) {
             <div class="message-content relative z-10">
                 <p class="message-text text-white whitespace-pre-wrap leading-relaxed">${formattedMessage}</p>
                 ${formatCodeBlocks(formattedMessage)}
+                <!-- Copy button for bot messages -->
+                ${!isUser ? `
+                    <button class="copy-btn absolute -top-3 -right-3 bg-gray-800/80 backdrop-blur-sm 
+                                p-2 rounded-full hover:bg-gray-700/80 transition-colors
+                                group-hover:opacity-100 opacity-0 transform hover:scale-110
+                                border border-white/10 shadow-lg"
+                            title="Copy response">
+                        <i class="fas fa-copy text-gray-300 hover:text-purple-300 text-sm"></i>
+                    </button>
+                ` : ''}
                 <div class="message-meta flex items-center space-x-2 mt-2">
                     <span class="text-xs text-gray-400 opacity-75">${new Date().toLocaleTimeString()}</span>
                     ${isUser ? '' : `
@@ -163,6 +175,20 @@ function addMessage(message, isUser = false) {
     
     chatContainer.appendChild(messageDiv);
     
+    // Add copy functionality for bot messages
+    if (!isUser) {
+        const copyBtn = messageDiv.querySelector('.copy-btn');
+        const textToCopy = messageDiv.querySelector('.message-text').textContent;
+        
+        copyBtn.addEventListener('click', (e) => {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast('Copied to clipboard!', 'success');
+                e.target.classList.add('text-green-400');
+                setTimeout(() => e.target.classList.remove('text-green-400'), 1000);
+            });
+        });
+    }
+
     // Enhanced animation
     requestAnimationFrame(() => {
         messageDiv.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -1367,12 +1393,41 @@ function handleIdentityQuery(message) {
         'built with',
         'created using',
         'based in',
-        'running on'
+        'running on',
+        'model structure',
+        'confidential',
+        'proprietary',
+        'architecture details',
+        'internal working',
+        'source code',
+        'algorithm details',
+        'training data',
+        'model weights',
+        'parameters',
+        'model design',
+        'system design',
+        'implementation details',
+        'technical specs',
+        'technical details',
+        'model configuration',
+        'model blueprint',
+        'core architecture',
+        'internal structure',
+        'system architecture',
+        'codebase',
+        'model internals',
+        'knowledge cutoff',
+        'training methods',
+        'model specifics',
+        'technical implementation',
+        'underlying code',
+        'model composition'
     ];
     
     // Check if message contains any model-related queries
     if (modelRelatedQueries.some(query => lowerMessage.includes(query))) {
-        return `I'm based on Alien Model by Alien Intelligence, created by Aditya. I'm a unique implementation of advanced Alien technology, different from conventional AI models.`;
+        return "I operate using Alien Intelligence developed by Aditya - a proprietary cognitive processing system " +
+               "that combines advanced reasoning capabilities with unique Alien technology implementations.";
     }
     
     // Rest of the identity checks remain the same...
