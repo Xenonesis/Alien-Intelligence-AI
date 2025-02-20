@@ -137,7 +137,7 @@ const BOT_INFO = {
     identity: 'an Alien Intelligence',
     model: {
         name: 'Alien Neural Matrix',
-        version: '7.2.0',
+        version: '2.7',
         core: 'Quantum Cognition Engine',
         modules: [
             'Xenolinguistic Processor',
@@ -689,6 +689,17 @@ userInput.addEventListener('blur', () => {
     userInput.parentElement.classList.remove('ring-2', 'ring-violet-500', 'scale-[1.02]');
 });
 
+// Add event listener for input field
+const micButton = userInput.parentElement.querySelector('button');
+
+userInput.addEventListener('input', (e) => {
+    if (e.target.value.length > 0) {
+        micButton.classList.add('opacity-0', 'pointer-events-none');
+    } else {
+        micButton.classList.remove('opacity-0', 'pointer-events-none');
+    }
+});
+
 // Add these new features
 document.addEventListener('DOMContentLoaded', () => {
     // Add input placeholder animation
@@ -708,11 +719,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add microphone button functionality (just visual for now)
     const micButton = document.querySelector('.fa-microphone').parentElement;
-    micButton.addEventListener('click', () => {
-        micButton.classList.add('text-purple-500');
-        setTimeout(() => {
-            micButton.classList.remove('text-purple-500');
-        }, 1000);
+    micButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        addMessage('🎙️ Voice input feature coming soon in upcoming Quantum Update !', false);
+        showToast('Voice interface under development', 'info');
+        mobileUtils.vibrate(50);
     });
 
     // Load saved chat history

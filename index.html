@@ -470,6 +470,18 @@
             @apply text-xs text-purple-300 font-mono pt-2 opacity-80;
             text-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
         }
+
+        /* Add transition for smooth fade */
+        #user-input + button {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        /* Hide state */
+        #user-input + button.hidden {
+            opacity: 0;
+            transform: translateY(2px);
+            pointer-events: none;
+        }
     </style>
     <script src="welcome.js"></script>
     <script>
