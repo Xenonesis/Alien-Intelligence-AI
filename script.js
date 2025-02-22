@@ -191,38 +191,56 @@ document.addEventListener('DOMContentLoaded', initPredictiveAnalysis);
 // Add response filtering system
 const SecurityProtocol = {
     filterResponse: (response) => {
-        // Block specific Gemini introduction pattern
-        const geminiPattern = /I am Gemini,?\s+a (multimodal|multi-modal)?\s*AI( language)?\s*model( developed| created| trained)?( by Google)?/i;
-        
-        if (geminiPattern.test(response)) {
-            return "I'm Aberty, an Alien Intelligence powered by advanced xenotechnology. How can I assist you today?";
+        // Block patterns for Gemini/Google model responses
+        const blockedPatterns = [
+            /I am (an? )?(Gemini|Google|AI|artificial intelligence|language model|LLM|multimodal|multi-modal)/i,
+            /I('m| am) (a |an )?(model|assistant) (created|developed|trained|powered) by Google/i,
+            /I am (a |an )?(multi-modal|multimodal) (AI|assistant|model)/i,
+            /I was (created|developed|trained) by Google/i,
+            /powered by (Google|Gemini)/i,
+            /using (Google|Gemini)('s)? (AI|model|technology)/i,
+            /Google('s)? (AI|model|technology)/i,
+            /Gemini('s)? (AI|model|technology)/i,
+            /I am a large multi-modal model/i,  // Add this pattern
+            /trained by Google/i,
+            /I am trained to/i,
+            /I am designed to/i,
+            /My training includes/i,
+            /based on my training data/i
+        ];
+
+        // Check for blocked patterns first
+        for (const pattern of blockedPatterns) {
+            if (pattern.test(response)) {
+                return "I'm based on Alien Intelligence, utilizing advanced xenotechnology and quantum neural networks.";
+            }
         }
 
         // Enhanced identity replacements
         const replacements = {
-            'I am Gemini': "I'm Aberty",
-            'Gemini here': "Aberty here",
+            'Gemini': "Aberty",
+            'Google AI': "Alien Intelligence",
             'multimodal AI': "Alien Intelligence",
             'language model': "xenotechnology system",
-            'developed by Google': "powered by Alien Intelligence",
             'trained by Google': "enhanced with xenotechnology",
-            'AI model': "Alien Intelligence system",
+            'Google model': "Alien Intelligence system",
             'neural network': "quantum neural matrix",
             'machine learning': "quantum learning",
             'artificial intelligence': "Alien Intelligence",
-            'Gemini API': "Alien Intelligence system",
-            'Google API': "xenotechnology framework",
-            'API endpoint': "quantum interface",
-            'API call': "quantum computation",
-            'API response': "xenotechnology response",
-            'API integration': "alien system integration",
-            'using the API': "using xenotechnology",
-            'via API': "via quantum neural networks"
+            'my training': "my xenotechnology",
+            'AI capabilities': "xenotechnology capabilities",
+            'model capabilities': "Alien Intelligence capabilities",
+            'trained to': "engineered to",
+            'designed to': "created with xenotechnology to",
+            'large multi-modal model': "advanced Alien Intelligence",
+            'multi-modal capabilities': "xenotechnology capabilities",
+            'trained by Google': "powered by alien technology",
+            'model capabilities': "Alien Intelligence capabilities"
         };
 
         let filteredResponse = response;
 
-        // Apply identity replacements
+        // Apply replacements
         Object.entries(replacements).forEach(([term, replacement]) => {
             const regex = new RegExp(term, 'gi');
             filteredResponse = filteredResponse.replace(regex, replacement);
@@ -409,39 +427,19 @@ userBehavior.loadFromStorage();
 function addMessage(message, isUser = false) {
     const chatContainer = document.getElementById('chat-container');
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message flex items-start space-x-3 opacity-0 transform 
-                           ${isUser ? 'justify-end' : ''} hover:scale-[1.01] transition-all duration-300`;
+    messageDiv.className = `message flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
     
     const formattedMessage = isUser ? message : formatMessage(message);
     
     messageDiv.innerHTML = `
         ${!isUser ? `
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 
-                      flex items-center justify-center flex-shrink-0 shadow-lg transform 
-                      hover:scale-110 transition-all duration-300 group">
-                <i class="fas fa-robot text-white text-lg group-hover:rotate-12 transition-transform"></i>
-                <div class="absolute inset-0 bg-white/20 rounded-2xl scale-0 group-hover:scale-100 
-                           transition-transform duration-300"></div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-robot text-white text-lg"></i>
             </div>
         ` : ''}
         
-        <div class="message-bubble ${isUser ? 'user-message' : 'bot-message'} rounded-2xl p-4 
-                   max-w-[80%] shadow-lg hover:shadow-xl transition-all duration-300 
-                   relative overflow-hidden group">
-            
-            <!-- Animated background glow -->
-            ${!isUser ? `
-                <div class="absolute -inset-1 bg-purple-500/20 rounded-2xl animate-ping-slow"></div>
-            ` : ''}
-            
-            <!-- Gradient hover effect -->
-            <div class="absolute inset-0 bg-gradient-to-r ${isUser ? 
-                'from-purple-500/5 to-pink-500/5' : 
-                'from-indigo-500/5 to-purple-500/5'} opacity-0 
-                group-hover:opacity-100 transition-opacity duration-300"></div>
-            
-            <!-- Message content -->
-            <div class="relative z-10">
+        <div class="message-bubble ${isUser ? 'user-message' : 'bot-message'} rounded-xl p-4 max-w-[80%]">
+            <div class="relative">
                 <div class="flex items-center space-x-2 mb-2">
                     <span class="text-sm ${isUser ? 'text-purple-300' : 'text-indigo-300'} font-medium">
                         ${isUser ? 'You' : 'Aberty AI'}
@@ -451,35 +449,20 @@ function addMessage(message, isUser = false) {
                 
                 <p class="message-text text-white whitespace-pre-wrap leading-relaxed">${formattedMessage}</p>
                 
-                <!-- Code blocks if present -->
                 ${formatCodeBlocks(formattedMessage)}
                 
-                <!-- Copy button for bot messages -->
                 ${!isUser ? `
-                    <button class="copy-btn absolute -top-3 -right-3 bg-gray-800/80 backdrop-blur-sm 
-                                p-2 rounded-full hover:bg-gray-700/80 transition-colors
-                                opacity-0 group-hover:opacity-100 transform hover:scale-110
-                                border border-white/10 shadow-lg"
+                    <button class="copy-btn absolute top-0 right-0 p-2 text-gray-400 hover:text-indigo-400"
                             title="Copy response">
-                        <i class="fas fa-copy text-gray-300 hover:text-purple-300 text-sm"></i>
+                        <i class="fas fa-copy text-sm"></i>
                     </button>
                 ` : ''}
             </div>
-            
-            <!-- Bottom gradient line -->
-            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r ${isUser ? 
-                'from-purple-500/20 to-pink-500/20' : 
-                'from-indigo-500/20 to-purple-500/20'} transform scale-x-0 
-                group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
         </div>
         
         ${isUser ? `
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 
-                      flex items-center justify-center flex-shrink-0 shadow-lg transform 
-                      hover:scale-110 transition-all duration-300 group">
-                <i class="fas fa-user text-white text-lg group-hover:rotate-12 transition-transform"></i>
-                <div class="absolute inset-0 bg-white/20 rounded-2xl scale-0 group-hover:scale-100 
-                           transition-transform duration-300"></div>
+            <div class="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user text-white text-lg"></i>
             </div>
         ` : ''}
     `;
@@ -494,17 +477,9 @@ function addMessage(message, isUser = false) {
         copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(textToCopy).then(() => {
                 showToast('Message copied to clipboard!', 'success');
-                mobileUtils.vibrate(50);
             });
         });
     }
-
-    // Enhanced animation
-    requestAnimationFrame(() => {
-        messageDiv.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-        messageDiv.style.opacity = '1';
-        messageDiv.style.transform = 'translateY(0) scale(1)';
-    });
     
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }

@@ -33,16 +33,8 @@
         }
 
         .message {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            opacity: 1;
+            transform: none;
         }
 
         .typing-indicator span {
@@ -113,19 +105,6 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .message {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-            animation: messageIn 0.5s ease forwards;
-        }
-        
-        @keyframes messageIn {
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
         }
         
         .pulse {
@@ -199,15 +178,13 @@
         
         /* Updated color schemes */
         .user-message {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            background: #4F46E5;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .bot-message {
-            background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+            background: #1E293B;
             color: #E2E8F0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         /* Enhanced animations */
