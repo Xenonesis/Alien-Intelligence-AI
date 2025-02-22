@@ -12,6 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link rel="icon" type="image/png" href="logo.png" id="favicon">
+    <link rel="stylesheet" href="mobile.css">
     <style>
         .chat-container {
             scrollbar-width: thin;
@@ -505,6 +506,107 @@
         #prediction-suggestions button:active {
             transform: scale(0.98);
         }
+
+        .quick-action-btn {
+            @apply px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
+                   text-white transition-all duration-300 flex items-center space-x-2
+                   border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl;
+        }
+
+        .quick-action-btn i {
+            @apply text-indigo-400;
+        }
+
+        .chip {
+            @apply px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 
+                   text-gray-300 text-sm transition-all duration-300
+                   border border-white/10 hover:border-white/20;
+        }
+
+        /* Enhanced message bubbles */
+        .message-bubble {
+            @apply relative overflow-hidden transition-all duration-300;
+        }
+
+        .message-bubble::before {
+            content: '';
+            @apply absolute inset-0 bg-gradient-to-b from-white/10 to-transparent 
+                   opacity-0 transition-opacity duration-300;
+        }
+
+        .message-bubble:hover::before {
+            @apply opacity-100;
+        }
+
+        /* Improved input area */
+        #chat-form {
+            @apply bg-gray-900/95 backdrop-blur-xl border-t border-white/10 
+                   shadow-lg transition-all duration-300;
+        }
+
+        #user-input {
+            @apply bg-white/5 border border-white/10 text-white placeholder-gray-400 
+                   rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 
+                   transition-all duration-300;
+        }
+
+        /* Enhanced mobile experience */
+        @media (max-width: 640px) {
+            .welcome-banner {
+                @apply p-3;
+            }
+
+            .quick-action-btn {
+                @apply px-3 py-2 text-sm;
+            }
+
+            .chip {
+                @apply px-3 py-1.5 text-xs;
+            }
+
+            #chat-form {
+                @apply sticky bottom-0 p-3;
+            }
+
+            .message-bubble {
+                @apply max-w-[90%] p-3;
+            }
+        }
+
+        /* Animation improvements */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Add dark mode glow effects */
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Enhanced scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
     <script src="welcome.js"></script>
     <script>
@@ -559,22 +661,58 @@
     </script>
 </head>
 <body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen flex flex-col">
-    <div class="container mx-auto p-4 flex-1 flex flex-col max-w-4xl">
-        <!-- Header Section - Make it more compact on mobile -->
+    <!-- Add mobile bottom sheet menu -->
+    <div id="mobile-menu-sheet" class="bottom-sheet hidden">
+        <div class="gesture-area"></div>
+        <div class="p-4 space-y-3">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-bold text-white">Actions</h3>
+                <button class="touch-target p-2" onclick="toggleBottomSheet()">
+                    <i class="fas fa-times text-gray-400"></i>
+                </button>
+            </div>
+            <button class="w-full p-4 rounded-xl bg-emerald-500/20 text-emerald-300 touch-feedback 
+                         flex items-center space-x-3" onclick="document.getElementById('doc-upload').click()">
+                <i class="fas fa-file-upload"></i>
+                <span>Upload Document</span>
+            </button>
+            <button class="w-full p-4 rounded-xl bg-white/5 text-white touch-feedback 
+                         flex items-center space-x-3" onclick="exportChat()">
+                <i class="fas fa-download"></i>
+                <span>Export Chat</span>
+            </button>
+            <button class="w-full p-4 rounded-xl bg-red-500/10 text-red-300 touch-feedback 
+                         flex items-center space-x-3" onclick="clearChat()">
+                <i class="fas fa-trash-alt"></i>
+                <span>Clear History</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Add floating action button for mobile -->
+    <button id="mobile-fab" class="mobile-fab sm:hidden" onclick="toggleBottomSheet()">
+        <i class="fas fa-ellipsis-v"></i>
+    </button>
+
+    <div class="container mx-auto mobile-container flex-1 flex flex-col max-w-4xl">
+        <!-- Update header for better mobile view -->
         <div class="text-center mb-4 sm:mb-6 slide-in">
-            <div class="inline-flex items-center space-x-3 bg-white/10 px-4 sm:px-6 py-2 sm:py-3 rounded-full backdrop-blur-lg hover-scale">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
+            <div class="inline-flex items-center space-x-3 bg-white/10 px-3 sm:px-6 py-2 
+                        rounded-full backdrop-blur-lg hover-scale">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 
+                           flex items-center justify-center touch-feedback">
                     <i class="fas fa-robot text-white"></i>
                 </div>
                 <div class="text-left">
-                    <h1 class="text-xl sm:text-2xl font-bold text-white header-title">Aberty AI</h1>
-                    <p class="text-sm text-gray-300">Powered by Alien Intelligence</p>
+                    <h1 class="mobile-header font-bold text-white">Aberty AI</h1>
+                    <p class="text-xs sm:text-sm text-gray-300">Powered by Alien Intelligence</p>
                 </div>
             </div>
         </div>
 
-        <!-- Main Chat Container -->
-        <div class="bg-white/5 rounded-3xl shadow-2xl flex-1 flex flex-col backdrop-blur-xl border border-white/10 relative overflow-hidden">
+        <!-- Update chat container for mobile -->
+        <div class="bg-white/5 rounded-3xl shadow-2xl flex-1 flex flex-col backdrop-blur-xl 
+                    border border-white/10 relative overflow-hidden">
             <!-- Chat Header -->
             <div class="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between relative z-10">
                 <div class="flex items-center space-x-4">
@@ -647,7 +785,42 @@
             </div>
 
             <!-- Chat Messages -->
-            <div class="flex-1 p-4 sm:p-6 overflow-y-auto chat-container custom-scrollbar space-y-4 sm:space-y-6" id="chat-container">
+            <div class="flex-1 p-3 sm:p-6 overflow-y-auto chat-container mobile-scrollbar 
+                        space-y-3 sm:space-y-6" id="chat-container">
+                <!-- Add welcome banner -->
+                <div class="welcome-banner bg-gradient-to-r from-indigo-600/20 to-purple-600/20 p-4 mb-6 rounded-xl backdrop-blur-md border border-white/10">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center animate-pulse">
+                            <i class="fas fa-robot text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white mb-1">Welcome to Alien Intelligence</h2>
+                            <p class="text-gray-300 text-sm">Powered by advanced xenotechnology</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <button class="quick-action-btn">
+                            <i class="fas fa-magic"></i>
+                            <span>Ask anything</span>
+                        </button>
+                        <button class="quick-action-btn">
+                            <i class="fas fa-file-upload"></i>
+                            <span>Upload documents</span>
+                        </button>
+                        <button class="quick-action-btn">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Get help</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add suggestion chips -->
+                <div class="suggestion-chips flex flex-wrap gap-2 mb-4">
+                    <button class="chip">How does Alien Intelligence work?</button>
+                    <button class="chip">Upload a document</button>
+                    <button class="chip">Tell me a story</button>
+                    <button class="chip">Ask for help</button>
+                </div>
                 <div class="message flex items-start space-x-3">
                     <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg">
                         <i class="fas fa-robot text-white text-sm"></i>
@@ -659,13 +832,14 @@
                 </div>
             </div>
 
-            <!-- Chat Input -->
-            <div class="p-4 sm:p-6 border-t border-white/10 relative z-10">
-                <form id="chat-form" class="flex space-x-2 sm:space-x-4">
+            <!-- Update input area for mobile -->
+            <div class="mobile-input-container">
+                <form id="chat-form" class="flex space-x-2">
                     <div class="flex-1 relative">
                         <input type="text" id="user-input" 
-                               class="w-full p-3 sm:p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-lg"
-                               placeholder="Type your message here...">
+                               class="w-full p-3 rounded-xl bg-white/5 border border-white/10 
+                                      text-white placeholder-gray-400 mobile-text"
+                               placeholder="Type your message...">
                         <button type="button" 
                                 class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition-colors p-1"
                                 title="Voice input">
@@ -673,10 +847,9 @@
                         </button>
                     </div>
                     <button type="submit" 
-                            class="p-3 sm:px-6 sm:py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:opacity-90 transition-all duration-300 flex items-center space-x-2 hover:scale-105 shadow-lg hover:shadow-xl"
-                            title="Send message">
-                        <span class="button-text">Send</span>
-                        <i class="fas fa-paper-plane button-icon"></i>
+                            class="touch-target p-3 rounded-xl bg-gradient-to-r from-indigo-500 
+                                   to-purple-500 text-white touch-feedback">
+                        <i class="fas fa-paper-plane"></i>
                     </button>
                 </form>
             </div>
@@ -695,5 +868,50 @@
     <div id="system-status" class="text-xs text-purple-300 font-mono"></div>
 
     <script src="script.js"></script>
+    <script>
+        function toggleBottomSheet() {
+            const sheet = document.getElementById('mobile-menu-sheet');
+            sheet.classList.toggle('hidden');
+            
+            if (!sheet.classList.contains('hidden')) {
+                // Add touch gesture handling
+                let startY;
+                sheet.addEventListener('touchstart', e => {
+                    startY = e.touches[0].clientY;
+                });
+                
+                sheet.addEventListener('touchmove', e => {
+                    const deltaY = e.touches[0].clientY - startY;
+                    if (deltaY > 50) {
+                        sheet.classList.add('hidden');
+                    }
+                });
+            }
+        }
+
+        // Handle mobile keyboard
+        const input = document.getElementById('user-input');
+        input.addEventListener('focus', () => {
+            if (window.innerWidth < 640) {
+                setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 300);
+            }
+        });
+
+        // Add pull-to-refresh prevention
+        document.body.addEventListener('touchmove', e => {
+            if (window.scrollY === 0) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Handle mobile back button
+        window.addEventListener('popstate', () => {
+            const sheet = document.getElementById('mobile-menu-sheet');
+            if (!sheet.classList.contains('hidden')) {
+                sheet.classList.add('hidden');
+                history.pushState(null, '');
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>

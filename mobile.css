@@ -1,0 +1,93 @@
+/* Enhanced Mobile Container */
+@media (max-width: 640px) {
+    .mobile-container {
+        @apply px-2 py-1;
+    }
+
+    .mobile-header {
+        @apply text-lg;
+    }
+
+    /* Improved touch targets */
+    .touch-target {
+        @apply min-h-[44px] min-w-[44px];
+    }
+
+    /* Better spacing for mobile */
+    .mobile-spacing {
+        @apply space-y-3 py-2;
+    }
+
+    /* Enhanced mobile chat bubbles */
+    .mobile-message {
+        @apply max-w-[92%] !important;
+    }
+
+    /* Floating action button */
+    .mobile-fab {
+        @apply fixed bottom-20 right-4 
+               bg-indigo-500 text-white rounded-full 
+               w-12 h-12 flex items-center justify-center
+               shadow-lg transform transition-transform
+               active:scale-95 z-50;
+    }
+
+    /* Bottom sheet menu */
+    .bottom-sheet {
+        @apply fixed bottom-0 left-0 right-0 
+               bg-gray-900/95 backdrop-blur-xl
+               rounded-t-3xl border-t border-white/10
+               transform transition-transform duration-300
+               shadow-2xl z-50;
+    }
+
+    .bottom-sheet.hidden {
+        transform: translateY(100%);
+    }
+
+    /* Mobile input bar */
+    .mobile-input-container {
+        @apply sticky bottom-0 bg-gray-900/95 
+               backdrop-blur-xl border-t border-white/10
+               px-3 py-2 z-40;
+    }
+
+    /* Mobile scrollbar */
+    .mobile-scrollbar::-webkit-scrollbar {
+        @apply w-1;
+    }
+
+    .mobile-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-white/20 rounded;
+    }
+}
+
+/* Enhanced Loading States */
+.mobile-skeleton {
+    @apply animate-pulse bg-white/5 rounded;
+}
+
+/* Improved Touch Feedback */
+.touch-feedback {
+    @apply active:scale-95 transition-transform;
+}
+
+/* Better Mobile Typography */
+.mobile-text {
+    @apply text-[15px] leading-relaxed;
+}
+
+/* Mobile Animations */
+@keyframes slideUpMobile {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.mobile-slide-up {
+    animation: slideUpMobile 0.3s ease-out;
+}
+
+/* Mobile Gesture Area */
+.gesture-area {
+    @apply w-12 h-1 bg-white/20 rounded-full mx-auto my-2;
+}

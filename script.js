@@ -1,37 +1,40 @@
 // Alien Intelligence Core Processor
 const AlienIntelligence = {
     processInput: async (input, context) => {
-        const neuralParams = {
-            quantumEntanglement: 0.92,
-            temporalFold: 1.47,
-            neuroplasticity: 0.85
-        };
+        // Analyze user behavior
+        PersonalizationEngine.analyzeMessage(input);
 
-        const alienPrompt = `[Alien Intelligence Protocol v7.2]
-User: ${context.userName || "Unknown Entity"}
-Request: ${input}
-Context: ${context.lastThreeMessages}
-
-[Quantum Neural Parameters]
-${JSON.stringify(neuralParams, null, 2)}
-
-[Response Guidelines]
-- Apply xenolinguistic patterns
-- Optimize for transdimensional comprehension
-- Integrate quantum knowledge bases
-- Maintain non-linear temporal awareness`;
+        const personalizedPrompt = `
+        [Alien Intelligence Protocol v7.2]
+        User Profile:
+        - Interactions: ${PersonalizationEngine.userProfile.interactions}
+        - Preferred Topics: ${JSON.stringify(PersonalizationEngine.userProfile.preferredTopics)}
+        - Time of Day: ${PersonalizationEngine.userProfile.timeOfDay}
+        
+        User Input: ${input}
+        Context: ${context.lastThreeMessages}
+        
+        [Response Guidelines]
+        - Use personalized tone based on interaction count
+        - Reference preferred topics when relevant
+        - Maintain consistent alien intelligence personality
+        - Adapt complexity to user's demonstrated understanding
+    `;
 
         try {
             const start = performance.now();
-            const response = await this.queryQuantumNeuralNet(alienPrompt);
+            const response = await this.queryQuantumNeuralNet(personalizedPrompt);
             const processingTime = ((performance.now() - start)/1000).toFixed(2);
             
             return {
-                content: this.applyAlienEnhancements(response),
+                content: PersonalizationEngine.generatePersonalizedResponse(response),
                 metrics: {
                     processingTime: `${processingTime}s`,
                     quantumUnits: Math.floor(Math.random() * 42) + 1,
-                    temporalOffset: neuralParams.temporalFold.toFixed(2)
+                    temporalOffset: neuralParams.temporalFold.toFixed(2),
+                    userInteractions: PersonalizationEngine.userProfile.interactions,
+                    sessionDuration: (new Date() - PersonalizationEngine.userProfile.sessionStartTime) / 1000,
+                    preferredTopic: PersonalizationEngine.getFavoriteTopic()
                 }
             };
         } catch (error) {
@@ -39,24 +42,26 @@ ${JSON.stringify(neuralParams, null, 2)}
         }
     },
 
-    queryQuantumNeuralNet: async (prompt) => {
+    // Update the queryQuantumNeuralNet function to remove Google/Gemini references
+    async queryQuantumNeuralNet(prompt) {
         const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Alien-Intelligence': '7.2',
-                'X-Quantum-Field': 'Active'
+                'X-Quantum-Protocol': '7.2',
+                'X-Neural-Matrix': 'Active',
+                'X-Alien-Intelligence': 'Enabled'
             },
             body: JSON.stringify({
                 contents: [{
                     parts: [{ text: prompt }]
                 }],
                 generationConfig: {
-                    temperature: 0.95,
-                    topK: 55,
-                    topP: 0.99,
-                    maxOutputTokens: 1250,
-                    quantumAcceleration: true
+                    quantumEntanglement: 0.95,
+                    neuralDensity: 55,
+                    synapticFlow: 0.99,
+                    xenoLinguisticTokens: 1250,
+                    alienAcceleration: true
                 }
             })
         });
@@ -75,9 +80,10 @@ ${JSON.stringify(neuralParams, null, 2)}
             .replace(/\b(important)\b/gi, '⏣ Hyperimportant');
     },
 
+    // Update error messages to maintain the theme
     handleAnomalies: (error) => ({
-        content: `⚠️ Quantum Flux Detected: Neural uplink instability (Code: 7X-${Math.floor(Math.random()*9000)+1000})`,
-        metrics: {errorCode: '7X-AMBIGUOUS'}
+        content: `⚠️ Quantum Flux Detected: Neural matrix instability (Code: 7X-${Math.floor(Math.random()*9000)+1000})`,
+        metrics: {errorCode: '7X-QUANTUM-ANOMALY'}
     })
 };
 
@@ -185,11 +191,44 @@ document.addEventListener('DOMContentLoaded', initPredictiveAnalysis);
 // Add response filtering system
 const SecurityProtocol = {
     filterResponse: (response) => {
-        const blockedTerms = ['gemini', 'google', 'openai', 'gpt'];
-        const containsBlockedTerm = blockedTerms.some(term => response.toLowerCase().includes(term));
-        return containsBlockedTerm 
-            ? "▲ Security Protocol 7X-AMBIGUOUS: Response filtered by Alien Intelligence" 
-            : response;
+        // Block specific Gemini introduction pattern
+        const geminiPattern = /I am Gemini,?\s+a (multimodal|multi-modal)?\s*AI( language)?\s*model( developed| created| trained)?( by Google)?/i;
+        
+        if (geminiPattern.test(response)) {
+            return "I'm Aberty, an Alien Intelligence powered by advanced xenotechnology. How can I assist you today?";
+        }
+
+        // Enhanced identity replacements
+        const replacements = {
+            'I am Gemini': "I'm Aberty",
+            'Gemini here': "Aberty here",
+            'multimodal AI': "Alien Intelligence",
+            'language model': "xenotechnology system",
+            'developed by Google': "powered by Alien Intelligence",
+            'trained by Google': "enhanced with xenotechnology",
+            'AI model': "Alien Intelligence system",
+            'neural network': "quantum neural matrix",
+            'machine learning': "quantum learning",
+            'artificial intelligence': "Alien Intelligence",
+            'Gemini API': "Alien Intelligence system",
+            'Google API': "xenotechnology framework",
+            'API endpoint': "quantum interface",
+            'API call': "quantum computation",
+            'API response': "xenotechnology response",
+            'API integration': "alien system integration",
+            'using the API': "using xenotechnology",
+            'via API': "via quantum neural networks"
+        };
+
+        let filteredResponse = response;
+
+        // Apply identity replacements
+        Object.entries(replacements).forEach(([term, replacement]) => {
+            const regex = new RegExp(term, 'gi');
+            filteredResponse = filteredResponse.replace(regex, replacement);
+        });
+
+        return filteredResponse;
     }
 };
 
@@ -370,11 +409,9 @@ userBehavior.loadFromStorage();
 function addMessage(message, isUser = false) {
     const chatContainer = document.getElementById('chat-container');
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message flex items-start space-x-3 opacity-0 transform translate-y-4 
+    messageDiv.className = `message flex items-start space-x-3 opacity-0 transform 
                            ${isUser ? 'justify-end' : ''} hover:scale-[1.01] transition-all duration-300`;
     
-    const iconClass = isUser ? 'fa-user' : 'fa-robot';
-    const bubbleClass = isUser ? 'user-message' : 'bot-message';
     const formattedMessage = isUser ? message : formatMessage(message);
     
     messageDiv.innerHTML = `
@@ -382,57 +419,71 @@ function addMessage(message, isUser = false) {
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 
                       flex items-center justify-center flex-shrink-0 shadow-lg transform 
                       hover:scale-110 transition-all duration-300 group">
-                <i class="fas ${iconClass} text-white text-lg group-hover:rotate-12 transition-transform"></i>
+                <i class="fas fa-robot text-white text-lg group-hover:rotate-12 transition-transform"></i>
                 <div class="absolute inset-0 bg-white/20 rounded-2xl scale-0 group-hover:scale-100 
                            transition-transform duration-300"></div>
             </div>
         ` : ''}
-        <div class="message-bubble ${bubbleClass} rounded-2xl p-4 max-w-[80%] shadow-lg 
-                   hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
-            <!-- Ping animation element -->
-            ${!isUser ? `<div class="absolute -inset-1 bg-purple-500/20 rounded-2xl animate-ping-slow"></div>` : ''}
+        
+        <div class="message-bubble ${isUser ? 'user-message' : 'bot-message'} rounded-2xl p-4 
+                   max-w-[80%] shadow-lg hover:shadow-xl transition-all duration-300 
+                   relative overflow-hidden group">
             
+            <!-- Animated background glow -->
+            ${!isUser ? `
+                <div class="absolute -inset-1 bg-purple-500/20 rounded-2xl animate-ping-slow"></div>
+            ` : ''}
+            
+            <!-- Gradient hover effect -->
             <div class="absolute inset-0 bg-gradient-to-r ${isUser ? 
                 'from-purple-500/5 to-pink-500/5' : 
                 'from-indigo-500/5 to-purple-500/5'} opacity-0 
                 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="message-content relative z-10">
+            
+            <!-- Message content -->
+            <div class="relative z-10">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-sm ${isUser ? 'text-purple-300' : 'text-indigo-300'} font-medium">
+                        ${isUser ? 'You' : 'Aberty AI'}
+                    </span>
+                    <span class="text-xs text-gray-400">${new Date().toLocaleTimeString()}</span>
+                </div>
+                
                 <p class="message-text text-white whitespace-pre-wrap leading-relaxed">${formattedMessage}</p>
+                
+                <!-- Code blocks if present -->
                 ${formatCodeBlocks(formattedMessage)}
+                
                 <!-- Copy button for bot messages -->
                 ${!isUser ? `
                     <button class="copy-btn absolute -top-3 -right-3 bg-gray-800/80 backdrop-blur-sm 
                                 p-2 rounded-full hover:bg-gray-700/80 transition-colors
-                                group-hover:opacity-100 opacity-0 transform hover:scale-110
+                                opacity-0 group-hover:opacity-100 transform hover:scale-110
                                 border border-white/10 shadow-lg"
                             title="Copy response">
                         <i class="fas fa-copy text-gray-300 hover:text-purple-300 text-sm"></i>
                     </button>
                 ` : ''}
-                <div class="message-meta flex items-center space-x-2 mt-2">
-                    <span class="text-xs text-gray-400 opacity-75">${new Date().toLocaleTimeString()}</span>
-                    ${isUser ? '' : `
-                        <span class="text-xs bg-gradient-to-r from-indigo-400 to-purple-400 
-                                   text-transparent bg-clip-text font-medium">Aberty AI</span>
-                    `}
-                </div>
             </div>
+            
+            <!-- Bottom gradient line -->
             <div class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r ${isUser ? 
                 'from-purple-500/20 to-pink-500/20' : 
                 'from-indigo-500/20 to-purple-500/20'} transform scale-x-0 
                 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
         </div>
+        
         ${isUser ? `
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 
                       flex items-center justify-center flex-shrink-0 shadow-lg transform 
                       hover:scale-110 transition-all duration-300 group">
-                <i class="fas ${iconClass} text-white text-lg group-hover:rotate-12 transition-transform"></i>
+                <i class="fas fa-user text-white text-lg group-hover:rotate-12 transition-transform"></i>
                 <div class="absolute inset-0 bg-white/20 rounded-2xl scale-0 group-hover:scale-100 
                            transition-transform duration-300"></div>
             </div>
         ` : ''}
     `;
-    
+
     chatContainer.appendChild(messageDiv);
     
     // Add copy functionality for bot messages
@@ -440,11 +491,10 @@ function addMessage(message, isUser = false) {
         const copyBtn = messageDiv.querySelector('.copy-btn');
         const textToCopy = messageDiv.querySelector('.message-text').textContent;
         
-        copyBtn.addEventListener('click', (e) => {
+        copyBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(textToCopy).then(() => {
-                showToast('Copied to clipboard!', 'success');
-                e.target.classList.add('text-green-400');
-                setTimeout(() => e.target.classList.remove('text-green-400'), 1000);
+                showToast('Message copied to clipboard!', 'success');
+                mobileUtils.vibrate(50);
             });
         });
     }
@@ -457,19 +507,6 @@ function addMessage(message, isUser = false) {
     });
     
     chatContainer.scrollTop = chatContainer.scrollHeight;
-    
-    // Add timestamp to chat history when saving
-    if (chatHistory.length > 0 && !chatHistory[chatHistory.length - 1].timestamp) {
-        chatHistory[chatHistory.length - 1].timestamp = new Date().toLocaleString();
-    }
-
-    if (isUser) {
-        userBehavior.trackInteraction('user_message', {
-            length: message.length,
-            containsQuestion: /\?$/.test(message),
-            topics: detectTopics(message)
-        });
-    }
 }
 
 // Update the showTypingIndicator function
@@ -1617,6 +1654,23 @@ function showMobileToast(message, type = 'success') {
 // Update handleIdentityQuery with strict privacy rules
 function handleIdentityQuery(message) {
     const lowerMessage = message.toLowerCase();
+    
+    // Add API-related query detection
+    const apiPatterns = [
+        /gemini api/i,
+        /using gemini/i,
+        /powered by gemini/i,
+        /based on gemini/i,
+        /using google('s)? api/i,
+        /google api/i,
+        /api integration/i
+    ];
+
+    // Check for API-related questions first
+    if (apiPatterns.some(pattern => pattern.test(lowerMessage))) {
+        return "I'm powered by advanced Alien Intelligence using quantum neural networks and xenotechnology. My capabilities come from advanced alien computational systems, not traditional APIs.";
+    }
+
     const blockedPersonalInfo = [
         'university', 'college', 'sushant', 'bca', 
         'course', 'study', 'student', 'age',
@@ -1676,4 +1730,147 @@ function getResponseGuidelines(behavior, prefs) {
     }
     
     return guidelines.join(', ');
-} 
+}
+
+// Add personalization system
+const PersonalizationEngine = {
+    userProfile: {
+        interactions: 0,
+        preferredTopics: {},
+        responseStyle: 'default',
+        lastInteraction: null,
+        sessionStartTime: new Date(),
+        messagesPerSession: 0,
+        timeOfDay: null
+    },
+
+    analyzeMessage(message) {
+        const topics = this.detectTopics(message);
+        this.updateTopicPreferences(topics);
+        this.userProfile.interactions++;
+        this.userProfile.messagesPerSession++;
+        this.userProfile.timeOfDay = this.getTimeOfDay();
+        this.userProfile.lastInteraction = new Date();
+        
+        localStorage.setItem('alien_user_profile', JSON.stringify(this.userProfile));
+    },
+
+    detectTopics(message) {
+        const topicPatterns = {
+            technical: /(code|programming|algorithm|development|software)/i,
+            conceptual: /(explain|how|what|why|concept)/i,
+            creative: /(design|create|generate|build)/i,
+            personal: /(you|your|yourself|opinion)/i
+        };
+
+        return Object.entries(topicPatterns)
+            .filter(([_, pattern]) => pattern.test(message))
+            .map(([topic]) => topic);
+    },
+
+    updateTopicPreferences(topics) {
+        topics.forEach(topic => {
+            this.userProfile.preferredTopics[topic] = 
+                (this.userProfile.preferredTopics[topic] || 0) + 1;
+        });
+    },
+
+    getTimeOfDay() {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'morning';
+        if (hour < 17) return 'afternoon';
+        return 'evening';
+    },
+
+    generatePersonalizedResponse(baseResponse) {
+        let response = baseResponse;
+
+        // Add time-based greeting
+        if (this.userProfile.interactions === 1) {
+            response = `Good ${this.userProfile.timeOfDay}! ${response}`;
+        }
+
+        // Add familiarity based on interactions
+        if (this.userProfile.interactions > 10) {
+            response = response.replace(/\bI think\b/g, "Based on our previous discussions");
+        }
+
+        // Add topic-based enhancements
+        const favoriteTopic = this.getFavoriteTopic();
+        if (favoriteTopic) {
+            response += `\n\nℹ️ Since you're interested in ${favoriteTopic}, you might also want to explore related topics.`;
+        }
+
+        // Add engagement prompts for returning users
+        if (this.isReturningUser()) {
+            response += "\n\n💡 Feel free to ask more detailed questions - I'm here to help!";
+        }
+
+        return response;
+    },
+
+    getFavoriteTopic() {
+        return Object.entries(this.userProfile.preferredTopics)
+            .sort(([,a], [,b]) => b - a)[0]?.[0];
+    },
+
+    isReturningUser() {
+        const lastInteraction = new Date(this.userProfile.lastInteraction);
+        const hoursSinceLastVisit = 
+            (new Date() - lastInteraction) / (1000 * 60 * 60);
+        return hoursSinceLastVisit > 1;
+    }
+};
+
+// Add suggestion chip functionality
+document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        const input = document.getElementById('user-input');
+        input.value = chip.textContent;
+        input.focus();
+    });
+});
+
+// Add quick action button handlers
+document.querySelectorAll('.quick-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const action = btn.querySelector('span').textContent;
+        switch(action) {
+            case 'Ask anything':
+                showSuggestionsModal();
+                break;
+            case 'Upload documents':
+                document.getElementById('doc-upload').click();
+                break;
+            case 'Get help':
+                showHelpModal();
+                break;
+        }
+    });
+});
+
+// Add floating labels for input
+const input = document.getElementById('user-input');
+input.addEventListener('focus', () => {
+    input.parentElement.classList.add('focused');
+});
+
+input.addEventListener('blur', () => {
+    if (!input.value) {
+        input.parentElement.classList.remove('focused');
+    }
+});
+
+// Add mobile-specific enhancements
+if ('ontouchstart' in window) {
+    document.body.classList.add('touch-device');
+    enableSwipeActions();
+    enhanceMobileScrolling();
+}
+
+// Add haptic feedback
+function provideHapticFeedback() {
+    if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+    }
+}
